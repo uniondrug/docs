@@ -1,0 +1,27 @@
+{
+    "name" : "uniondrug/postman",
+    "description" : "export uniondrug application as documents and postman.json",
+    "keywords" : [
+        "phalcon",
+        "postman"
+    ],
+    "license" : "proprietary",
+    "type" : "library",
+    "authors" : [
+        {
+            "name" : "Uniondrug Dev Team",
+            "email" : "dev@uniondrug.cn"
+        }
+    ],
+    "require" : {
+        "uniondrug/framework" : "^2.0"
+    },
+    "require-dev" : {
+        "uniondrug/console" : "^2.2"
+    },
+    "autoload" : {
+        "psr-4" : {
+            "Uniondrug\\Postman\\" : "src/"
+        }
+    }
+}
