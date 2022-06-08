@@ -1,18 +1,15 @@
 <?php
-/**
- * @author wsfuyibing <websearch@163.com>
- * @date   2018-05-09
- */
-namespace Uniondrug\Postman\Parsers;
+
+namespace Uniondrug\Docs\Parsers;
 
 use App\Errors\Code;
 use Phalcon\Di;
 use Uniondrug\Framework\Container;
-use Uniondrug\Postman\Parsers\Abstracts\Base;
+use Uniondrug\Docs\Parsers\Abstracts\Base;
 
 /**
  * 解析控制器
- * @package Uniondrug\Postman\Parsers
+ * @package Uniondrug\Docs\Parsers
  */
 class Collection extends Base
 {
@@ -115,7 +112,7 @@ class Collection extends Base
             }
         }
         // 3. 遍历目录
-        $this->scanner($path.'/'.$this->controllerPath);
+        $this->scanner($path . '/' . $this->controllerPath);
     }
 
     /**
@@ -129,7 +126,7 @@ class Collection extends Base
                 $controller = new Controller($this, $class);
                 $controller->parser();
                 $this->controllers[$class] = $controller;
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $this->console->error($e->getMessage());
             }
         }
@@ -151,19 +148,19 @@ class Collection extends Base
     public function toMarkdown()
     {
         // 1. title
-        $text = '# '.$this->name;
+        $text = '# ' . $this->name;
         // 2. description
         if ($this->description !== '') {
-            $text .= $this->eol.$this->description;
+            $text .= $this->eol . $this->description;
         }
         // 3. information
         $text .= $this->eol;
-        $text .= '* **鉴权** : `'.(strtoupper($this->auth) === 'YES' ? '开启' : '关闭').'`'.$this->crlf;
-        $text .= '* **域名** : `'.$this->schema.'://'.$this->host.'.'.$this->domain.'`'.$this->crlf;
-        $text .= '* **导出** : `'.date('Y-m-d H:i').'`';
+        $text .= '* **鉴权** : `' . (strtoupper($this->auth) === 'YES' ? '开启' : '关闭') . '`' . $this->crlf;
+        $text .= '* **域名** : `' . $this->schema . '://' . $this->host . '.' . $this->domain . '`' . $this->crlf;
+        $text .= '* **导出** : `' . date('Y-m-d H:i') . '`';
         // 4. index
         $text .= $this->eol;
-        $text .= '### 接口目录'.$this->eol;
+        $text .= '### 接口目录' . $this->eol;
         foreach ($this->controllers as $controller) {
             if (count($controller->methods) === 0) {
                 continue;
@@ -171,10 +168,10 @@ class Collection extends Base
             $name = trim($controller->annotation->name);
             $desc = preg_replace("/\n/", "", trim($controller->annotation->description));
             $url = str_replace('\\', '/', substr($controller->reflect->getName(), 16));
-            $text .= '* ['.$name.'](./'.$url.'/README.md) : '.$desc.$this->crlf;
+            $text .= '* [' . $name . '](./' . $url . '/README.md) : ' . $desc . $this->crlf;
             $apis = $controller->getIndex(false);
             if ($apis !== '') {
-                $text .= $apis.$this->crlf;
+                $text .= $apis . $this->crlf;
             }
         }
         // 5. code map
@@ -183,7 +180,7 @@ class Collection extends Base
         $text .= $this->eol;
         $text .= $this->getCodeMap();
         // 6. save README.md
-        $this->saveMarkdown($this->exportPath.'/'.$this->publishTo, 'README.md', $text);
+        $this->saveMarkdown($this->exportPath . '/' . $this->publishTo, 'README.md', $text);
         // 7. trigger controllers
         foreach ($this->controllers as $controller) {
             $controller->toMarkdown();
@@ -258,7 +255,7 @@ class Collection extends Base
         /*$sdkClass = preg_replace_callback("/[\.|\-](\w)/", function($a){
             return strtoupper($a[1]);
         }, implode('.', $appNameArr));*/
-        $sdkClass = preg_replace_callback("/[\.|\-](\w)/", function($a){
+        $sdkClass = preg_replace_callback("/[\.|\-](\w)/", function ($a) {
             return strtoupper($a[1]);
         }, implode('.', $appNameAsc));
         // 1.2 赋初始值
@@ -270,7 +267,7 @@ class Collection extends Base
         $data->sdkPath = $this->sdkPath($sdkPath);
         $data->sdkService = $appName;
         //$data->sdkLink = "https://uniondrug.coding.net/p/".implode(".", $appNameDesc)."/git/blob/development";;
-        $data->sdkLink = "https://uniondrug.coding.net/p/".implode("-", $appNameAsc)."/git/blob/development";
+        $data->sdkLink = "https://uniondrug.coding.net/p/" . implode("-", $appNameAsc) . "/git/blob/development";
         // 2. 配置文件优选级
         $path = "{$this->basePath}/postman.json";
         if (file_exists($path)) {
@@ -330,7 +327,7 @@ class Collection extends Base
                 continue;
             }
             // 3. 读取类名
-            $class = '\\App\\Controllers\\'.substr($info->getPathname(), $length + 1, -4);
+            $class = '\\App\\Controllers\\' . substr($info->getPathname(), $length + 1, -4);
             $this->classMap[] = $class;
         }
     }
@@ -348,12 +345,12 @@ class Collection extends Base
         $exec = [];
         $exec[] = 'var env = pm.environment.get(\'domain\');';
         $exec[] = 'var runType = pm.environment.get(\'swoole\');';
-        $exec[] = 'var port = '.$_defaultPort.';';
+        $exec[] = 'var port = ' . $_defaultPort . ';';
         $exec[] = 'if (env != \'dev.uniondrug.info\' && env != \'turboradio.cn\' && env != \'uniondrug.net\' && env != \'uniondrug.cn\') {';
         $exec[] = '    if (runType == undefined || runType == \'0\' || runType == \'false\') {';
-        $exec[] = '        port = '.$_defaultPort.';';
+        $exec[] = '        port = ' . $_defaultPort . ';';
         $exec[] = '    } else {';
-        $exec[] = '        port = '.$_serverPort.';';
+        $exec[] = '        port = ' . $_serverPort . ';';
         $exec[] = '    }';
         $exec[] = '}';
         $exec[] = 'pm.environment.set("port", port);';
@@ -362,7 +359,7 @@ class Collection extends Base
             [
                 'listen' => 'prerequest',
                 'script' => [
-                    'id' => md5($this->name.'::'.$this->name),
+                    'id' => md5($this->name . '::' . $this->name),
                     'type' => 'text/javascript',
                     'exec' => $exec
                 ]

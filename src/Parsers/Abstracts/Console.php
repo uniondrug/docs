@@ -1,13 +1,10 @@
 <?php
-/**
- * @author wsfuyibing <websearch@163.com>
- * @date   2018-05-09
- */
-namespace Uniondrug\Postman\Parsers\Abstracts;
+
+namespace Uniondrug\Docs\Parsers\Abstracts;
 
 /**
  * 控制台消息
- * @package Uniondrug\Postman\Parsers\Abstracts
+ * @package Uniondrug\Docs\Parsers\Abstracts
  */
 class Console
 {

@@ -1,15 +1,12 @@
 <?php
-/**
- * @author wsfuyibing <websearch@163.com>
- * @date   2018-05-09
- */
-namespace Uniondrug\Postman\Parsers;
+
+namespace Uniondrug\Docs\Parsers;
 
 use Uniondrug\Structs\Struct;
 
 /**
  * 参数解析
- * @package Uniondrug\Postman\Parsers
+ * @package Uniondrug\Docs\Parsers
  */
 class Parameters
 {
@@ -65,7 +62,7 @@ class Parameters
         // 3. class name
         $cn = trim($m[1]);
         if ($cn[0] !== '\\') {
-            $cn = '\\'.$ns.'\\'.$cn;
+            $cn = '\\' . $ns . '\\' . $cn;
         }
         // 4. reflect
         $reflect = new \ReflectionClass($cn);
@@ -128,13 +125,13 @@ class Parameters
     public function toMarkdown($input = false)
     {
         // 1. base level
-        $text = '> '.$this->reflect->name.$this->method->eol;
-        $text .= $this->thead($input).$this->method->crlf;
+        $text = '> ' . $this->reflect->name . $this->method->eol;
+        $text .= $this->thead($input) . $this->method->crlf;
         foreach ($this->properties as $property) {
-            if ($property->annotation->isExecuted){
+            if ($property->annotation->isExecuted) {
                 continue;
             }
-            $text .= $this->tbody($input, $property).$this->method->crlf;
+            $text .= $this->tbody($input, $property) . $this->method->crlf;
         }
         // 2. nest level
         foreach ($this->children as $child) {
@@ -152,18 +149,18 @@ class Parameters
         // 1. th
         $text = '|';
         foreach ($columns as $column) {
-            $text .= ' '.$column.' |';
+            $text .= ' ' . $column . ' |';
             $separators[] = ':--';
         }
         $text .= $this->method->crlf;
         // 2. separator
-        $text .= '| '.implode(' | ', $separators).' |';
+        $text .= '| ' . implode(' | ', $separators) . ' |';
         // 3. table header
         return $text;
     }
 
     /**
-     * @param boolean  $input
+     * @param boolean $input
      * @param Property $property
      * @return string
      */
@@ -172,7 +169,7 @@ class Parameters
         $text = '|';
         $columns = $input ? self::$inputColumns : self::$outputColumns;
         foreach ($columns as $tag => $_) {
-            $text .= ' '.$this->tbodyTags($property, $tag).' |';
+            $text .= ' ' . $this->tbodyTags($property, $tag) . ' |';
         }
         return $text;
     }
@@ -180,12 +177,12 @@ class Parameters
     /**
      * 标签过滤
      * @param Property $property
-     * @param string   $tag
+     * @param string $tag
      * @return string
      */
     private function tbodyTags($property, $tag)
     {
-        $m = 'with'.ucfirst($tag);
+        $m = 'with' . ucfirst($tag);
         if (method_exists($this, $m)) {
             return $this->{$m}($property);
         }
@@ -211,7 +208,7 @@ class Parameters
         $name = $property->name;
         if ($property->annotation->aliasName !== null && $property->annotation->aliasName !== '') {
             $name .= '<br />';
-            $name .= '别名: '.$property->annotation->aliasName;
+            $name .= '别名: ' . $property->annotation->aliasName;
         }
         return $name;
     }
@@ -227,7 +224,7 @@ class Parameters
             $type .= '[]';
         }
         if ($property->annotation->isStructType) {
-            return '`'.$type.'`';
+            return '`' . $type . '`';
         }
         return $type;
     }
@@ -264,7 +261,7 @@ class Parameters
     {
         $desc = $property->annotation->typeText;
         if ($property->annotation->description !== '') {
-            $desc .= '<br />'.preg_replace("/\n/", "<br />", $property->annotation->description);
+            $desc .= '<br />' . preg_replace("/\n/", "<br />", $property->annotation->description);
         }
         return $desc;
     }

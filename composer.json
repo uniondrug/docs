@@ -1,6 +1,6 @@
 {
-    "name" : "uniondrug/postman",
-    "description" : "export uniondrug application as documents and postman.json",
+    "name" : "uniondrug/docs",
+    "description" : "export uniondrug application as documents and postman.json; upload to torna",
     "keywords" : [
         "phalcon",
         "postman"
@@ -21,7 +21,7 @@
     },
     "autoload" : {
         "psr-4" : {
-            "Uniondrug\\Postman\\" : "src/"
+            "Uniondrug\\Docs\\" : "src/"
         }
     }
 }

@@ -1,16 +1,13 @@
 <?php
-/**
- * @author wsfuyibing <websearch@163.com>
- * @date   2018-05-04
- */
-namespace Uniondrug\Postman\Commands;
+
+namespace Uniondrug\Docs\Commands;
 
 use Uniondrug\Console\Command;
-use Uniondrug\Postman\Parsers\Collection;
+use Uniondrug\Docs\Parsers\Collection;
 
 /**
  * 导出POSTMAN格式的API文档
- * @package Uniondrug\Postman\Commands
+ * @package Uniondrug\Docs\Commands
  */
 class Postman extends Command
 {
@@ -21,14 +18,15 @@ class Postman extends Command
     public $exportPath = '';
     public $publishTo = 'docs/api';
     public $publishPostmanTo = 'docs';
+
     /**
      * @inheritdoc
      */
     public function handle()
     {
         $path = getcwd();
-        $this->exportPath = $this->exportPath ?:$path;
-        $collection = new Collection($path,$this->exportPath);
+        $this->exportPath = $this->exportPath ?: $path;
+        $collection = new Collection($path, $this->exportPath);
         $collection->publishTo = $this->publishTo;
         $collection->publishPostmanTo = $this->publishPostmanTo;
         $collection->parser();
@@ -44,6 +42,6 @@ class Postman extends Command
     private function asPostman(Collection $collection)
     {
         $contents = $collection->toPostman();
-        $collection->saveMarkdown($collection->exportPath.'/'.$collection->publishPostmanTo, 'postman.json', $contents);
+        $collection->saveMarkdown($collection->exportPath . '/' . $collection->publishPostmanTo, 'postman.json', $contents);
     }
 }

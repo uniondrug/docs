@@ -1,15 +1,12 @@
 <?php
-/**
- * @author wsfuyibing <websearch@163.com>
- * @date   2018-05-09
- */
-namespace Uniondrug\Postman\Parsers;
 
-use Uniondrug\Postman\Parsers\Abstracts\Base;
+namespace Uniondrug\Docs\Parsers;
+
+use Uniondrug\Docs\Parsers\Abstracts\Base;
 
 /**
  * 解析注释
- * @package Uniondrug\Postman\Parsers
+ * @package Uniondrug\Docs\Parsers
  */
 class Annotation extends Base
 {
@@ -106,7 +103,7 @@ class Annotation extends Base
         $this->reflect = $reflect;
         $comment = $reflect->getDocComment();
         if (is_string($comment) && $comment !== '') {
-            $this->comment = "\n\n".$comment."\n\n";
+            $this->comment = "\n\n" . $comment . "\n\n";
         }
     }
 

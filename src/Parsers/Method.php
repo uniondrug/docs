@@ -1,15 +1,12 @@
 <?php
-/**
- * @author wsfuyibing <websearch@163.com>
- * @date   2018-05-09
- */
-namespace Uniondrug\Postman\Parsers;
 
-use Uniondrug\Postman\Parsers\Abstracts\Base;
+namespace Uniondrug\Docs\Parsers;
+
+use Uniondrug\Docs\Parsers\Abstracts\Base;
 
 /**
  * 解析方法
- * @package Uniondrug\Postman\Parsers
+ * @package Uniondrug\Docs\Parsers
  */
 class Method extends Base
 {
@@ -36,8 +33,8 @@ class Method extends Base
 
     /**
      * Method constructor.
-     * @param Collection        $collection
-     * @param Controller        $controller
+     * @param Collection $collection
+     * @param Controller $controller
      * @param \ReflectionMethod $reflect
      */
     public function __construct(Collection $collection, Controller $controller, \ReflectionMethod $reflect)
@@ -72,13 +69,13 @@ class Method extends Base
         }
         // 1. 补齐
         if ($this->annotation->name === '') {
-            $this->annotation->name = $this->reflect->name.'()';
+            $this->annotation->name = $this->reflect->name . '()';
         }
         // 2. 入参
         if ($this->annotation->input !== '') {
             try {
                 $this->inputParameter = new Parameters($this, $this->annotation->input, $this->controller->reflect->getNamespaceName());
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $this->console->error($e->getMessage());
             }
         }
@@ -86,7 +83,7 @@ class Method extends Base
         if ($this->annotation->output !== '') {
             try {
                 $this->outputParameter = new Parameters($this, $this->annotation->output, $this->controller->reflect->getNamespaceName());
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $this->console->error($e->getMessage());
             }
         }
@@ -97,25 +94,25 @@ class Method extends Base
      */
     public function toMarkdown()
     {
-        $text = '# '.$this->annotation->name.$this->eol;
+        $text = '# ' . $this->annotation->name . $this->eol;
         $text .= $this->headerText();
-        $text .= $this->eol.$this->sdkText();
-        $text .= $this->eol.$this->inputText();
-        $text .= $this->eol.$this->inputCode();
-        $text .= $this->eol.$this->outputText();
-        $text .= $this->eol.$this->outputCode();
+        $text .= $this->eol . $this->sdkText();
+        $text .= $this->eol . $this->inputText();
+        $text .= $this->eol . $this->inputCode();
+        $text .= $this->eol . $this->outputText();
+        $text .= $this->eol . $this->outputCode();
         $text .= $this->eol;
         $text .= '### 编码对照表';
         $text .= $this->eol;
         $text .= $this->collection->getCodeMap();
         $name = str_replace('\\', '/', substr($this->controller->reflect->getName(), 16));
-        $path = $this->collection->exportPath.'/'.$this->collection->publishTo.'/'.$name;
-        $this->saveMarkdown($path, $this->reflect->getShortName().'.md', $text);
+        $path = $this->collection->exportPath . '/' . $this->collection->publishTo . '/' . $name;
+        $this->saveMarkdown($path, $this->reflect->getShortName() . '.md', $text);
         /**
          * 添加到SDK列表
          */
         if ($this->annotation->isSdk) {
-            $this->controller->collection->sdkx->add($this->annotation->sdkName, $this->annotation->method, $this->controller->annotation->prefix.$this->annotation->path, $this->annotation->name, $this->annotation->description, $name.'/'.$this->reflect->getShortName().'.md');
+            $this->controller->collection->sdkx->add($this->annotation->sdkName, $this->annotation->method, $this->controller->annotation->prefix . $this->annotation->path, $this->annotation->name, $this->annotation->description, $name . '/' . $this->reflect->getShortName() . '.md');
         }
     }
 
@@ -136,7 +133,7 @@ class Method extends Base
     public function toPostmanEvent()
     {
         $exec = [];
-        $exec[] = 'pm.test("'.$this->annotation->name.'", function(){';
+        $exec[] = 'pm.test("' . $this->annotation->name . '", function(){';
         $exec[] = '    var json = pm.response.json();';
         $exec[] = '    pm.response.to.be.ok;';
         $exec[] = '    pm.expect("0").to.equal(json.errno);';
@@ -145,7 +142,7 @@ class Method extends Base
             [
                 'listen' => 'test',
                 'script' => [
-                    'id' => md5($this->controller->reflect->name.'::'.$this->reflect->name),
+                    'id' => md5($this->controller->reflect->name . '::' . $this->reflect->name),
                     'type' => 'text/javascript',
                     'exec' => $exec
                 ]
@@ -171,11 +168,11 @@ class Method extends Base
         }
         // url
         $data['url'] = [
-            'raw' => $this->schema.'://'.$this->collection->host.'.'.$this->domain.':'.$this->port.$this->controller->annotation->prefix.$this->annotation->path,
+            'raw' => $this->schema . '://' . $this->collection->host . '.' . $this->domain . ':' . $this->port . $this->controller->annotation->prefix . $this->annotation->path,
             'protocol' => $this->schema,
-            'host' => explode('.', $this->collection->host.'.'.$this->domain),
+            'host' => explode('.', $this->collection->host . '.' . $this->domain),
             'port' => $this->port,
-            'path' => explode('/', substr($this->controller->annotation->prefix.$this->annotation->path, 1))
+            'path' => explode('/', substr($this->controller->annotation->prefix . $this->annotation->path, 1))
         ];
         // post body
         if ($this->annotation->isPostMethod) {
@@ -189,7 +186,7 @@ class Method extends Base
             ];
         }
         // desc
-        $data['description'] = $this->headerText().$this->eol.$this->inputText().$this->eol.$this->outputText().$this->eol.$this->outputCode();
+        $data['description'] = $this->headerText() . $this->eol . $this->inputText() . $this->eol . $this->outputText() . $this->eol . $this->outputCode();
         $data['description'] .= $this->eol;
         $data['description'] .= '### 编码';
         $data['description'] .= $this->eol;
@@ -213,20 +210,20 @@ class Method extends Base
         // 2. description
         if ($this->annotation->description !== '') {
             //$text .= $this->eol.'> '.$this->annotation->description;
-            $text .= '> '.$this->annotation->description;
+            $text .= '> ' . $this->annotation->description;
         }
         // 3. tags
         $text .= $this->eol;
-        $text .= '* **接口** : `'.$this->annotation->method.' '.$this->controller->annotation->prefix.$this->annotation->path.'`'.$this->crlf;
+        $text .= '* **接口** : `' . $this->annotation->method . ' ' . $this->controller->annotation->prefix . $this->annotation->path . '`' . $this->crlf;
         if ($this->annotation->input !== '') {
-            $text .= '* **入参** : `'.preg_replace("/^[^A-Z]/", "", $this->annotation->input).'`'.$this->crlf;
+            $text .= '* **入参** : `' . preg_replace("/^[^A-Z]/", "", $this->annotation->input) . '`' . $this->crlf;
         }
         if ($this->annotation->output !== '') {
-            $text .= '* **出参** : `'.preg_replace("/^[^A-Z]/", "", $this->annotation->output).'`'.$this->crlf;
+            $text .= '* **出参** : `' . preg_replace("/^[^A-Z]/", "", $this->annotation->output) . '`' . $this->crlf;
         }
-        $text .= '* **文件** : `'.$this->controller->filename.'`'.$this->crlf;
-        $text .= '* **执行** : `'.$this->controller->reflect->name.'::'.$this->reflect->name.'()'.'`'.$this->crlf;
-        $text .= '* **导出** : `'.date('Y-m-d H:i').'`';
+        $text .= '* **文件** : `' . $this->controller->filename . '`' . $this->crlf;
+        $text .= '* **执行** : `' . $this->controller->reflect->name . '::' . $this->reflect->name . '()' . '`' . $this->crlf;
+        $text .= '* **导出** : `' . date('Y-m-d H:i') . '`';
         // 4. 返回
         return $text;
     }
@@ -238,46 +235,46 @@ class Method extends Base
             return '';
         }
         // 2. SDK用法
-        $text = '### SDK'.$this->eol;
+        $text = '### SDK' . $this->eol;
         // 2.1
         if ($this->collection->sdk !== '') {
-            $text .= '**`一类用法`**'.$this->eol;
-            $text .= '```'.$this->crlf;
-            $text .= '// [推荐]推荐使用本用法'.$this->crlf;
-            $text .= '//      不足之处, 需发布导出的['.ucfirst($this->collection->sdk).'Sdk.php]文件到SDK项目下'.$this->crlf;
-            $text .= '//      并创建release版本, 调用方执行composer update完成更新'.$this->crlf;
-            $text .= '// SDK项目地址 https://github.com/uniondrug/service-sdk'.$this->crlf;
-            $text .= '$body = [];'.$this->crlf;
-            $text .= '$query = null;//Query数据'.$this->crlf;
-            $text .= '$extra = null;//请求头信息'.$this->crlf;
-            $text .= '$response = $this->serviceSdk->'.lcfirst($this->collection->sdkPath).'->'.$this->collection->sdk.'->'.lcfirst($this->annotation->sdkName).'($body, $query, $extra);'.$this->crlf;
+            $text .= '**`一类用法`**' . $this->eol;
+            $text .= '```' . $this->crlf;
+            $text .= '// [推荐]推荐使用本用法' . $this->crlf;
+            $text .= '//      不足之处, 需发布导出的[' . ucfirst($this->collection->sdk) . 'Sdk.php]文件到SDK项目下' . $this->crlf;
+            $text .= '//      并创建release版本, 调用方执行composer update完成更新' . $this->crlf;
+            $text .= '// SDK项目地址 https://github.com/uniondrug/service-sdk' . $this->crlf;
+            $text .= '$body = [];' . $this->crlf;
+            $text .= '$query = null;//Query数据' . $this->crlf;
+            $text .= '$extra = null;//请求头信息' . $this->crlf;
+            $text .= '$response = $this->serviceSdk->' . lcfirst($this->collection->sdkPath) . '->' . $this->collection->sdk . '->' . lcfirst($this->annotation->sdkName) . '($body, $query, $extra);' . $this->crlf;
             $text .= '```';
             $text .= $this->eol;
         }
         // 2.2
-        $host = "{$this->controller->collection->host}://".preg_replace("/^\/+/", '', $this->controller->annotation->prefix.$this->annotation->path);
-        $text .= '_`二类用法`_'.$this->eol;
-        $text .= '```'.$this->crlf;
-        $text .= '// [慎用]不推荐'.$this->crlf;
-        $text .= '//      该用法需要你知道域名前缀及路径路径, 同时不便于后期维护'.$this->crlf;
-        $text .= '//      一经修改将有大量项目及文件(调用方)同步修改'.$this->crlf;
-        $text .= '$body = [];'.$this->crlf;
-        $text .= '$query = null;//Query数据'.$this->crlf;
-        $text .= '$extra = null;//请求头信息'.$this->crlf;
-        $text .= '$response = $this->serviceSdk->'.strtolower($this->annotation->method);
-        $text .= '("'.$host.'", $body, $query, $extra);'.$this->crlf;
-        $text .= '```'.$this->eol;
+        $host = "{$this->controller->collection->host}://" . preg_replace("/^\/+/", '', $this->controller->annotation->prefix . $this->annotation->path);
+        $text .= '_`二类用法`_' . $this->eol;
+        $text .= '```' . $this->crlf;
+        $text .= '// [慎用]不推荐' . $this->crlf;
+        $text .= '//      该用法需要你知道域名前缀及路径路径, 同时不便于后期维护' . $this->crlf;
+        $text .= '//      一经修改将有大量项目及文件(调用方)同步修改' . $this->crlf;
+        $text .= '$body = [];' . $this->crlf;
+        $text .= '$query = null;//Query数据' . $this->crlf;
+        $text .= '$extra = null;//请求头信息' . $this->crlf;
+        $text .= '$response = $this->serviceSdk->' . strtolower($this->annotation->method);
+        $text .= '("' . $host . '", $body, $query, $extra);' . $this->crlf;
+        $text .= '```' . $this->eol;
         // 2.3
-        $text .= '*结果处理*'.$this->eol;
-        $text .= '```'.$this->crlf;
-        $text .= '// 任意一种用法拿到结果时'.$this->crlf;
-        $text .= 'if ($response->hasError()){'.$this->crlf;
-        $text .= '    // 执行错误逻辑;'.$this->crlf;
-        $text .= '}'.$this->crlf;
+        $text .= '*结果处理*' . $this->eol;
+        $text .= '```' . $this->crlf;
+        $text .= '// 任意一种用法拿到结果时' . $this->crlf;
+        $text .= 'if ($response->hasError()){' . $this->crlf;
+        $text .= '    // 执行错误逻辑;' . $this->crlf;
+        $text .= '}' . $this->crlf;
         // 5. p3
-        $text .= '// 执行正确逻辑'.$this->crlf;
-        $text .= '// ...'.$this->crlf;
-        $text .= '```'.$this->crlf;
+        $text .= '// 执行正确逻辑' . $this->crlf;
+        $text .= '// ...' . $this->crlf;
+        $text .= '```' . $this->crlf;
         return $text;
     }
 
@@ -292,10 +289,10 @@ class Method extends Base
             return $text;
         }
         // 2. 格式化
-        $text .= '### 入参'.$this->eol;
+        $text .= '### 入参' . $this->eol;
         // 3. 结构体错误
         if ($this->inputParameter === null) {
-            $text .= '> 结构体 `'.$this->annotation->input.'` 不能正确解析';
+            $text .= '> 结构体 `' . $this->annotation->input . '` 不能正确解析';
             return $text;
         }
         // 4. 导出文档
@@ -316,9 +313,9 @@ class Method extends Base
             return $text;
         }
         // 2. json string
-        $text .= '*示例*'.$this->eol;
-        $text .= '```'.$this->crlf;
-        $text .= json_encode($this->inputParameter->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).$this->crlf;
+        $text .= '*示例*' . $this->eol;
+        $text .= '```' . $this->crlf;
+        $text .= json_encode($this->inputParameter->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . $this->crlf;
         $text .= '```';
         return $text;
     }
@@ -335,10 +332,10 @@ class Method extends Base
             return $text;
         }
         // 2. 格式化
-        $text .= '### 出参'.$this->eol;
+        $text .= '### 出参' . $this->eol;
         // 3. 结构体错误
         if ($this->outputParameter === null) {
-            $text .= '> 结构体 `'.$this->annotation->output.'` 不能正确解析';
+            $text .= '> 结构体 `' . $this->annotation->output . '` 不能正确解析';
             return $text;
         }
         // 4. 导出文档
@@ -359,9 +356,9 @@ class Method extends Base
             return $text;
         }
         // 2. json string
-        $text .= '*示例*'.$this->eol;
-        $text .= '```'.$this->crlf;
-        $text .= json_encode($this->outputParameter->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).$this->crlf;
+        $text .= '*示例*' . $this->eol;
+        $text .= '```' . $this->crlf;
+        $text .= json_encode($this->outputParameter->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . $this->crlf;
         $text .= '```';
         return $text;
     }

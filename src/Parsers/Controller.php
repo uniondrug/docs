@@ -1,15 +1,12 @@
 <?php
-/**
- * @author wsfuyibing <websearch@163.com>
- * @date   2018-05-09
- */
-namespace Uniondrug\Postman\Parsers;
 
-use Uniondrug\Postman\Parsers\Abstracts\Base;
+namespace Uniondrug\Docs\Parsers;
+
+use Uniondrug\Docs\Parsers\Abstracts\Base;
 
 /**
  * 解析控制器
- * @package Uniondrug\Postman\Parsers
+ * @package Uniondrug\Docs\Parsers
  */
 class Controller extends Base
 {
@@ -30,7 +27,7 @@ class Controller extends Base
     /**
      * Controller constructor.
      * @param Collection $collection
-     * @param string     $class 控制器类名
+     * @param string $class 控制器类名
      */
     public function __construct(Collection $collection, string $class)
     {
@@ -73,7 +70,7 @@ class Controller extends Base
                 $method = new Method($this->collection, $this, $reflect);
                 $method->parser();
                 $this->methods[] = $method;
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $this->console->error($e->getMessage());
             }
         }
@@ -89,11 +86,11 @@ class Controller extends Base
         $comma = '';
         $space = $curr ? '' : '    ';
         $url = str_replace('\\', '/', substr($this->reflect->getName(), 16));
-        $prefix = './'.($curr ? '' : $url.'/');
+        $prefix = './' . ($curr ? '' : $url . '/');
         foreach ($this->methods as $method) {
             $name = trim($method->annotation->name);
             $desc = trim(preg_replace("/\n/", " ", trim($method->annotation->description)));
-            $text .= $comma.$space.'* ['.$name.']('.$prefix.$method->reflect->getShortName().'.md)';
+            $text .= $comma . $space . '* [' . $name . '](' . $prefix . $method->reflect->getShortName() . '.md)';
             if ($method->annotation->ver !== '') {
                 $text .= " `{$method->annotation->ver}` ";
             }
@@ -101,7 +98,7 @@ class Controller extends Base
                 $text .= " `SDK` ";
             }
             if ($desc !== '') {
-                $text .= ' : '.$desc;
+                $text .= ' : ' . $desc;
             }
             $comma = $this->crlf;
         }
@@ -115,24 +112,24 @@ class Controller extends Base
     public function toMarkdown()
     {
         $name = str_replace('\\', '/', substr($this->reflect->getName(), 16));
-        $path = $this->collection->exportPath.'/'.$this->collection->publishTo.'/'.$name;
+        $path = $this->collection->exportPath . '/' . $this->collection->publishTo . '/' . $name;
         $count = count($this->methods);
         if ($count === 0) {
             $this->console->warning("控制器{$this->reflect->getName()}无可导出动作, 忽略导出");
             return;
         }
         // 1. title
-        $text = '# '.$this->annotation->name;
+        $text = '# ' . $this->annotation->name;
         // 2. description
         $desc = $this->annotation->description;
         if ($desc !== '') {
-            $text .= $this->eol.'> '.$desc;
+            $text .= $this->eol . '> ' . $desc;
         }
         // 3. information
         $text .= $this->eol;
-        $text .= "* **接口** : `".$count."` 个".$this->crlf;
-        $text .= "* **前缀** : `{$this->annotation->prefix}`".$this->crlf;
-        $text .= "* **类名** : `{$this->reflect->name}`".$this->crlf;
+        $text .= "* **接口** : `" . $count . "` 个" . $this->crlf;
+        $text .= "* **前缀** : `{$this->annotation->prefix}`" . $this->crlf;
+        $text .= "* **类名** : `{$this->reflect->name}`" . $this->crlf;
         $text .= "* **文件** : `{$this->filename}`";
         // 4. index
         $text .= $this->eol;
@@ -159,13 +156,13 @@ class Controller extends Base
     public function toPostman()
     {
         $description = '';
-        $description .= "* **接口** : `".count($this->methods)."` 个".$this->crlf;
-        $description .= "* **前缀** : `{$this->annotation->prefix}`".$this->crlf;
-        $description .= "* **类名** : `{$this->reflect->name}`".$this->crlf;
+        $description .= "* **接口** : `" . count($this->methods) . "` 个" . $this->crlf;
+        $description .= "* **前缀** : `{$this->annotation->prefix}`" . $this->crlf;
+        $description .= "* **类名** : `{$this->reflect->name}`" . $this->crlf;
         $description .= "* **文件** : `{$this->filename}`";
         $data = [
             'name' => $this->annotation->name,
-            'description' => $this->annotation->description.$description,
+            'description' => $this->annotation->description . $description,
             'item' => []
         ];
         foreach ($this->methods as $method) {

@@ -1,8 +1,4 @@
-# POSTMAN
-
-> 以命令行的模式, 一健导出`Markdown`文档、`Postman`接口工具、`SDK`。
-
-
+# DOCS
 
 
 ### 如何导出

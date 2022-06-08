@@ -1,15 +1,12 @@
 <?php
-/**
- * @author wsfuyibing <websearch@163.com>
- * @date   2018-05-09
- */
-namespace Uniondrug\Postman\Parsers\Abstracts;
 
-use Uniondrug\Postman\Parsers\Annotation;
+namespace Uniondrug\Docs\Parsers\Abstracts;
+
+use Uniondrug\Docs\Parsers\Annotation;
 
 /**
  * 解析基类
- * @package Uniondrug\Postman\Parsers\Abstracts
+ * @package Uniondrug\Docs\Parsers\Abstracts
  */
 abstract class Base
 {
@@ -39,7 +36,7 @@ abstract class Base
      */
     public function saveMarkdown($path, $name, $contents)
     {
-        $file = $path.'/'.$name;
+        $file = $path . '/' . $name;
         try {
             if (!is_dir($path)) {
                 mkdir($path, 0777, true);
@@ -48,7 +45,7 @@ abstract class Base
             fwrite($fp, $contents);
             fclose($fp);
             $this->console->debug("导出到%s文件", $file);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->console->error($e->getMessage());
             exit;
         }

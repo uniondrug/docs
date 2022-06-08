@@ -1,16 +1,13 @@
 <?php
-/**
- * @author wsfuyibing <websearch@163.com>
- * @date   2018-05-09
- */
-namespace Uniondrug\Postman\Parsers;
 
-use Uniondrug\Postman\Parsers\Abstracts\Base;
+namespace Uniondrug\Docs\Parsers;
+
+use Uniondrug\Docs\Parsers\Abstracts\Base;
 use Uniondrug\Structs\StructInterface;
 
 /**
  * 解析属性
- * @package Uniondrug\Postman\Parsers
+ * @package Uniondrug\Docs\Parsers
  */
 class Property extends Base
 {
@@ -18,7 +15,7 @@ class Property extends Base
     public $value;
 
     /**
-     * @param Method              $method
+     * @param Method $method
      * @param \ReflectionProperty $p
      */
     public function __construct(Method $method, StructInterface $struct, \ReflectionProperty $p)
@@ -39,7 +36,7 @@ class Property extends Base
             } else {
                 try {
                     $this->value = $struct->{$p->name};
-                } catch(\Throwable $e) {
+                } catch (\Throwable $e) {
                     $this->value = '?';
                 }
             }

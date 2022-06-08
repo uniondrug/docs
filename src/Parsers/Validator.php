@@ -1,13 +1,10 @@
 <?php
-/**
- * @author wsfuyibing <websearch@163.com>
- * @date   2018-05-09
- */
-namespace Uniondrug\Postman\Parsers;
+
+namespace Uniondrug\Docs\Parsers;
 
 /**
  * 解析属性
- * @package Uniondrug\Postman\Parsers
+ * @package Uniondrug\Docs\Parsers
  */
 class Validator
 {

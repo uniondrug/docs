@@ -1,15 +1,12 @@
 <?php
-/**
- * @author wsfuyibing <websearch@163.com>
- * @date   2018-05-09
- */
-namespace Uniondrug\Postman\Parsers;
 
-use Uniondrug\Postman\Parsers\Abstracts\Base;
+namespace Uniondrug\Docs\Parsers;
+
+use Uniondrug\Docs\Parsers\Abstracts\Base;
 
 /**
  * SDK列表
- * @package Uniondrug\Postman\Parsers
+ * @package Uniondrug\Docs\Parsers
  */
 class Sdkx extends Base
 {
@@ -37,7 +34,7 @@ class Sdkx extends Base
             foreach (explode("\n", $description) as $desc) {
                 $desc = trim($desc);
                 if ($desc !== '') {
-                    $text .= "\n".'     * '.$desc;
+                    $text .= "\n" . '     * ' . $desc;
                 }
             }
         }
@@ -48,7 +45,7 @@ class Sdkx extends Base
             'PATH' => $path,
             'TITLE' => trim($title),
             'DESCRIPTION' => $text,
-            'LINKTO' => $this->collection->sdkLink.'/'.$this->collection->publishTo.'/'.$linkTo
+            'LINKTO' => $this->collection->sdkLink . '/' . $this->collection->publishTo . '/' . $linkTo
         ];
     }
 
@@ -57,9 +54,9 @@ class Sdkx extends Base
      */
     public function export()
     {
-        $class = ucfirst($this->collection->sdk).'Sdk';
+        $class = ucfirst($this->collection->sdk) . 'Sdk';
         $template = $this->renderClass($class);
-        $this->saveMarkdown($this->collection->exportPath.'/'.$this->collection->publishPostmanTo, $class.'.php', $template);
+        $this->saveMarkdown($this->collection->exportPath . '/' . $this->collection->publishPostmanTo, $class . '.php', $template);
     }
 
     /**
@@ -108,13 +105,13 @@ TEMP;
             'AUTHOR' => 'PostmanCommand',
             'DATE' => date('Y-m-d'),
             'TIME' => date('r'),
-            'NAMESPACE' => ucfirst($this->collection->sdkPath)."s",
+            'NAMESPACE' => ucfirst($this->collection->sdkPath) . "s",
             'CLASS' => $class,
             'SERVICE' => $this->collection->sdkService,
             'METHODS' => $this->renderMethods()
         ];
         foreach ($values as $key => $value) {
-            $rexp = '/\{\{'.$key.'\}\}/';
+            $rexp = '/\{\{' . $key . '\}\}/';
             $template = preg_replace($rexp, $value, $template);
         }
         return $template;
@@ -142,7 +139,7 @@ TEMP;
     }
 TEMP;
         foreach ($datas as $key => $value) {
-            $rexp = '/\{\{'.$key.'\}\}/';
+            $rexp = '/\{\{' . $key . '\}\}/';
             $template = preg_replace($rexp, $value, $template);
         }
         return $template;
@@ -157,7 +154,7 @@ TEMP;
         reset($this->names);
         $methods = $comma = "";
         foreach ($this->names as $datas) {
-            $methods .= $comma.$this->renderMethod($datas);
+            $methods .= $comma . $this->renderMethod($datas);
             $comma = "\n\n";
         }
         return $methods;
