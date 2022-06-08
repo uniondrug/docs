@@ -4,8 +4,8 @@ namespace Uniondrug\Docs\Parsers;
 
 use App\Errors\Code;
 use Phalcon\Di;
-use Uniondrug\Framework\Container;
 use Uniondrug\Docs\Parsers\Abstracts\Base;
+use Uniondrug\Framework\Container;
 
 /**
  * 解析控制器
@@ -196,6 +196,26 @@ class Collection extends Base
      * 将导出的结果输出到postman.json文件中
      */
     public function toPostman()
+    {
+        $data = [
+            'info' => [
+                'name' => $this->name,
+                'description' => $this->description,
+                "schema" => "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+            ],
+            'item' => [],
+            'event' => $this->toPostmanEvent()
+        ];
+        foreach ($this->controllers as $controller) {
+            $data['item'][] = $controller->toPostman();
+        }
+        return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * 将导出的结果输出到torna.json文件中
+     */
+    public function toTorna()
     {
         $data = [
             'info' => [
