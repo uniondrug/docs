@@ -137,10 +137,10 @@ class Method extends Base
     public function toTorna()
     {
         $data = [
-            "name" => $this->annotation->name,
-            "description" => $this->annotation->aliasName,
-            "url" => $this->annotation->path,
-            "httpMethod" => $this->annotation->method,
+            "name" => trim($this->annotation->name),
+            "description" => trim($this->annotation->aliasName),
+            "url" => trim($this->annotation->path),
+            "httpMethod" => trim($this->annotation->method),
             "contentType" => "application/json;+charset=utf-8",
             "isFolder" => 0,
             "isShow" => 1,
@@ -232,22 +232,28 @@ class Method extends Base
      */
     public function toTornaRequest()
     {
-        if ($properties = $this->inputParameter->properties) {
-            foreach ($properties as $property) {
-                $data[] = [
-                    "name" => $property->annotation->name,
-                    "type" => $property->annotation->type,
-                    "required" => $property->annotation->validator->required,
-                    "maxLength" => "",
-                    "example" => $property->annotation->mock,
-                    "description" => $property->annotation->description,
-                    "children" => [
-                        
-                    ]
-                ];
+        try {
+            if ($properties = $this->inputParameter->properties) {
+                foreach ($properties as $property) {
+                    $data[] = [
+                        "name" => trim($property->annotation->name),
+                        "type" => trim($property->annotation->type),
+                        "required" => trim($property->annotation->validator->required),
+                        "maxLength" => trim($property->annotation->validator->options),
+                        "example" => trim($property->annotation->mock),
+                        "description" => trim($property->annotation->description),
+                        "children" => [
+
+                        ]
+                    ];
+                }
             }
+            return $data;
+        } catch (\Exception $e) {
+
+        } finally {
+            return $data;
         }
-        return $data;
     }
 
     public function toPostmanResponse()

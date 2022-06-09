@@ -178,7 +178,7 @@ class Controller extends Base
     public function toTorna()
     {
         $data = [
-            'name' => $this->annotation->name,
+            'name' => trim($this->annotation->name),
             'isFolder' => 1,
             'author' => '',
             'orderIndex' => 1,

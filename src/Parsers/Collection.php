@@ -237,9 +237,9 @@ class Collection extends Base
             "gitUrl" => "",
             "gitHttpUrl" => "",
             "language" => "PHP",
-            "servicePort" => $this->serverPort,
-            "applicationName" => $this->appName,
-            "moduleName" => $this->name,
+            "servicePort" => trim($this->serverPort),
+            "applicationName" => trim($this->appName),
+            "moduleName" => trim($this->name),
             "softwareVersion" => ""
         ];
         foreach ($this->controllers as $controller) {

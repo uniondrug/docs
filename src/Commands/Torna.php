@@ -37,6 +37,7 @@ class Torna extends Command
 
     private function toTorna(Collection $collection)
     {
-        $collection->console->info("结束");
+        $collection->console->info("正在上传...");
+        $collection->console->info("完成");
     }
 }
