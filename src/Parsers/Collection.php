@@ -20,10 +20,20 @@ class Collection extends Base
     public $publishTo = 'docs/api';
     public $publishPostmanTo = 'docs';
     /**
-     * 名称
+     * 项目名称
+     * @var string
+     */
+    public $appName = '';
+    /**
+     * 项目中文名称
      * @var string
      */
     public $name = '';
+    /**
+     * 端口号
+     * @var string
+     */
+    public $serverPort = 80;
     /**
      * SDK类名
      * 如: mbs2
@@ -218,16 +228,22 @@ class Collection extends Base
     public function toTorna()
     {
         $data = [
-            'info' => [
-                'name' => $this->name,
-                'description' => $this->description,
-                "schema" => "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-            ],
-            'item' => [],
-            'event' => $this->toPostmanEvent()
+            'debugEnvs' => [],
+            'apis' => [],
+            "commonErrorCodes" => [],
+            "author" => "",
+            "isReplace" => 1,
+            "domain" => $this->host,
+            "gitUrl" => "",
+            "gitHttpUrl" => "",
+            "language" => "PHP",
+            "servicePort" => $this->serverPort,
+            "applicationName" => $this->appName,
+            "moduleName" => $this->name,
+            "softwareVersion" => ""
         ];
         foreach ($this->controllers as $controller) {
-            $data['item'][] = $controller->toPostman();
+            $data['apis'][] = $controller->toTorna();
         }
         return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
@@ -247,7 +263,16 @@ class Collection extends Base
         // 1.1 通过appName计算
         //     sdk
         //     sdkPath
-        $appName = $di->getConfig()->path('app.appName');
+        $this->appName = $di->getConfig()->path('app.appName');
+
+        // 端口
+        $serv = $di->getConfig()->path('server.host');
+        if ($serv) {
+            if (preg_match("/(\S+):(\d+)/", $serv, $m) > 0) {
+                $this->serverPort = substr($m[2], -4);
+            }
+        }
+
         /*$appName = preg_replace("/\-/", '.', $appName);
         $appNameArr = explode('.', $appName);
         $appNameDesc = [];
@@ -262,7 +287,7 @@ class Collection extends Base
         ])) {
             $this->console->warning("应用名称在配置文件[config/app.php]中的[appName]字段值不合法, 必须以module、union、backend结尾");
         }*/
-        $appNameArr = explode('-', $appName);
+        $appNameArr = explode('-', $this->appName);
         $appNameAsc = $appNameArr;
         $sdkPath = array_shift($appNameArr);
         if (!in_array($sdkPath, [
@@ -280,12 +305,12 @@ class Collection extends Base
         }, implode('.', $appNameAsc));
         // 1.2 赋初始值
         $data->auth = "NO";
-        $data->name = $appName;
-        $data->description = $appName;
-        $data->host = $appName;
+        $data->name = $this->appName;
+        $data->description = $this->appName;
+        $data->host = $this->appName;
         $data->sdk = $sdkClass;
         $data->sdkPath = $this->sdkPath($sdkPath);
-        $data->sdkService = $appName;
+        $data->sdkService = $this->appName;
         //$data->sdkLink = "https://uniondrug.coding.net/p/".implode(".", $appNameDesc)."/git/blob/development";;
         $data->sdkLink = "https://uniondrug.coding.net/p/" . implode("-", $appNameAsc) . "/git/blob/development";
         // 2. 配置文件优选级

@@ -130,6 +130,38 @@ class Method extends Base
         return $data;
     }
 
+    /**
+     * 生成Torna
+     * @return array
+     */
+    public function toTorna()
+    {
+        $data = [
+            "name" => $this->annotation->name,
+            "description" => $this->annotation->aliasName,
+            "url" => $this->annotation->path,
+            "httpMethod" => $this->annotation->method,
+            "contentType" => "application/json;+charset=utf-8",
+            "isFolder" => 0,
+            "isShow" => 1,
+            "author" => '',
+            "orderIndex" => 1,
+            "headerParams" => [],
+            "requestParams" => $this->toTornaRequest(),
+            "responseParams" => [],
+            "isRequestArray" => 0,
+            "isResponseArray" => 0,
+            "extras" => [
+                "hasTpsDegrade" => "false",
+                "apiAccess" => "INS",
+                "apiStyle" => "Normal",
+                "hasTps" => "false",
+                "apiLevel" => "L2"
+            ],
+        ];
+        return $data;
+    }
+
     public function toPostmanEvent()
     {
         $exec = [];
@@ -191,6 +223,30 @@ class Method extends Base
         $data['description'] .= '### 编码';
         $data['description'] .= $this->eol;
         $data['description'] .= $this->collection->getCodeMap();
+        return $data;
+    }
+
+    /**
+     * Torna入参解析
+     * @return array
+     */
+    public function toTornaRequest()
+    {
+        if ($properties = $this->inputParameter->properties) {
+            foreach ($properties as $property) {
+                $data[] = [
+                    "name" => $property->annotation->name,
+                    "type" => $property->annotation->type,
+                    "required" => $property->annotation->validator->required,
+                    "maxLength" => "",
+                    "example" => $property->annotation->mock,
+                    "description" => $property->annotation->description,
+                    "children" => [
+                        
+                    ]
+                ];
+            }
+        }
         return $data;
     }
 

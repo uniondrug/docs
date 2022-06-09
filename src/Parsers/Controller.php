@@ -170,4 +170,24 @@ class Controller extends Base
         }
         return $data;
     }
+
+    /**
+     * 转为Torna文件
+     * @return array
+     */
+    public function toTorna()
+    {
+        $data = [
+            'name' => $this->annotation->name,
+            'isFolder' => 1,
+            'author' => '',
+            'orderIndex' => 1,
+            'item' => [],
+            'extras' => []
+        ];
+        foreach ($this->methods as $method) {
+            $data['item'][] = $method->toTorna();
+        }
+        return $data;
+    }
 }
