@@ -233,6 +233,7 @@ class Method extends Base
     public function toTornaRequest()
     {
         try {
+            $data = [];
             if ($properties = $this->inputParameter->properties) {
                 foreach ($properties as $property) {
                     $data[] = [
@@ -250,7 +251,6 @@ class Method extends Base
             }
             return $data;
         } catch (\Exception $e) {
-
         } finally {
             return $data;
         }
