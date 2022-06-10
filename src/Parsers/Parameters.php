@@ -142,6 +142,42 @@ class Parameters
         return $text;
     }
 
+    /**
+     * TornaAction入参解析
+     * @param bool $input
+     * @return array
+     */
+    public function toTorna($input = false)
+    {
+        try {
+            $data = $children = [];
+            foreach ($this->properties as $p => $property) {
+//                if ($property->annotation->isExecuted) {
+//                    continue;
+//                }
+                $_data = [
+                    "name" => trim($property->name ?? ''),
+                    "type" => trim($property->annotation->type ?? ''),
+                    "required" => $property->annotation->validator->required ?? false,
+                    "maxLength" => $property->annotation->validator->options ?? '',
+                    "example" => trim($property->annotation->mock ?? ''),
+                    "description" => trim($property->annotation->name ?? ''),
+                    "children" => $children
+                ];
+
+                // 子级
+//                if ($property->annotation->isStructType) {
+                if (!empty($this->children[$p])) {
+                    $_data['children'] = $this->children[$p]->toTorna($input);
+                }
+                $data[] = $_data;
+            }
+        } catch (\Exception $e) {
+        } finally {
+            return $data;
+        }
+    }
+
     private function thead($input = false)
     {
         $columns = $input ? self::$inputColumns : self::$outputColumns;

@@ -223,29 +223,58 @@ class Collection extends Base
     }
 
     /**
-     * 将导出的结果输出到torna.json文件中
+     * 上传文档到Torna
      */
-    public function toTorna()
+    public function toTorna($save = false)
+    {
+        $uri = 'http://ud-torna.turboradio.cn/api';
+        $token = '099e2154ae6244c6aeae8eb4a235a045';
+
+        $this->console->info("正在上传文档到Torna...");
+        $res = (new \GuzzleHttp\Client())->post($uri, [
+            'json' => [
+                "name" => "doc.push",
+                "version" => "1.0",
+                "timestamp" => date('Y-m-d H:i:s'),
+                "project_name" => trim($this->name),
+                "access_token" => $token,
+                "application_name" => trim($this->appName),
+                "data" => urlencode(json_encode($this->toTornaData($save))),
+//                "sign" => "60F575C2C0E2D846700F5E59623D43E2",
+            ]
+        ]);
+        $result = json_decode($res->getBody()->__toString(), true);
+        if ($result['code'] != 0) {
+            $this->console->error("上传Torna出错: " . $result['msg']);
+            return;
+        }
+        $this->console->info("上传完成");
+    }
+
+    /**
+     * torna入参中的data节点
+     */
+    public function toTornaData($save = false)
     {
         $data = [
-            'debugEnvs' => [],
-            'apis' => [],
-            "commonErrorCodes" => [],
-            "author" => "",
-            "isReplace" => 1,
-            "domain" => $this->host,
-            "gitUrl" => "",
-            "gitHttpUrl" => "",
-            "language" => "PHP",
             "servicePort" => trim($this->serverPort),
             "applicationName" => trim($this->appName),
             "moduleName" => trim($this->name),
-            "softwareVersion" => ""
+            'debugEnvs' => new \stdClass(),
+            'apis' => [],
+            "commonErrorCodes" => [],
+            "author" => exec('git config user.name'),
+            "isReplace" => 1,
+            "domain" => $this->host,
+            "gitUrl" => "", //git ls-remote --get-url origin
+            "gitHttpUrl" => "",
+            "language" => "PHP",
+            "softwareVersion" => phpversion()
         ];
         foreach ($this->controllers as $controller) {
             $data['apis'][] = $controller->toTorna();
         }
-        return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        return $save ? json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : $data;
     }
 
     /**

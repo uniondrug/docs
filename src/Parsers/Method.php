@@ -30,6 +30,10 @@ class Method extends Base
      * @var Parameters
      */
     private $outputParameter = null;
+    /**
+     * 序列号
+     */
+    public static $sort = 1;
 
     /**
      * Method constructor.
@@ -131,7 +135,7 @@ class Method extends Base
     }
 
     /**
-     * 生成Torna
+     * Torna中的一个Action
      * @return array
      */
     public function toTorna()
@@ -141,24 +145,26 @@ class Method extends Base
             "description" => trim($this->annotation->aliasName),
             "url" => trim($this->annotation->path),
             "httpMethod" => trim($this->annotation->method),
-            "contentType" => "application/json;+charset=utf-8",
+            "contentType" => "application/json;charset=utf-8",
             "isFolder" => 0,
             "isShow" => 1,
             "author" => '',
-            "orderIndex" => 1,
+            "orderIndex" => self::$sort,
             "headerParams" => [],
             "requestParams" => $this->toTornaRequest(),
             "responseParams" => [],
             "isRequestArray" => 0,
             "isResponseArray" => 0,
-            "extras" => [
-                "hasTpsDegrade" => "false",
-                "apiAccess" => "INS",
-                "apiStyle" => "Normal",
-                "hasTps" => "false",
-                "apiLevel" => "L2"
-            ],
+            "extras" => new \stdClass(),
+//            "extras" => [
+//                "hasTpsDegrade" => "false",
+//                "apiAccess" => "INS",
+//                "apiStyle" => "Normal",
+//                "hasTps" => "false",
+//                "apiLevel" => "L2"
+//            ],
         ];
+        self::$sort++;
         return $data;
     }
 
@@ -227,33 +233,23 @@ class Method extends Base
     }
 
     /**
-     * Torna入参解析
+     * TornaAction入参结构体解析
      * @return array
      */
     public function toTornaRequest()
     {
-        try {
-            $data = [];
-            if ($properties = $this->inputParameter->properties) {
-                foreach ($properties as $property) {
-                    $data[] = [
-                        "name" => trim($property->annotation->name),
-                        "type" => trim($property->annotation->type),
-                        "required" => trim($property->annotation->validator->required),
-                        "maxLength" => trim($property->annotation->validator->options),
-                        "example" => trim($property->annotation->mock),
-                        "description" => trim($property->annotation->description),
-                        "children" => [
-
-                        ]
-                    ];
-                }
-            }
-            return $data;
-        } catch (\Exception $e) {
-        } finally {
+        $data = [];
+        // 未定义入参结构体
+        if ($this->annotation->input === '') {
             return $data;
         }
+        // 结构体错误
+        if ($this->inputParameter === null) {
+            $this->console->error('> 结构体 `' . $this->annotation->input . '` 不能正确解析');
+            return $data;
+        }
+        // 解析
+        return $this->inputParameter->toTorna(true);
     }
 
     public function toPostmanResponse()

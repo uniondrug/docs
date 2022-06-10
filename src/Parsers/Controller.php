@@ -25,6 +25,11 @@ class Controller extends Base
     public $filename;
 
     /**
+     * 序列号
+     */
+    public static $sort = 1;
+
+    /**
      * Controller constructor.
      * @param Collection $collection
      * @param string $class 控制器类名
@@ -172,7 +177,7 @@ class Controller extends Base
     }
 
     /**
-     * 转为Torna文件
+     * 构建Torna中的apis(folder)
      * @return array
      */
     public function toTorna()
@@ -181,13 +186,15 @@ class Controller extends Base
             'name' => trim($this->annotation->name),
             'isFolder' => 1,
             'author' => '',
-            'orderIndex' => 1,
-            'item' => [],
-            'extras' => []
+            'orderIndex' => self::$sort,
+            'items' => [],
+            'extras' => new \stdClass()
         ];
         foreach ($this->methods as $method) {
-            $data['item'][] = $method->toTorna();
+            $data['items'][] = $method->toTorna();
         }
+        self::$sort++;
+        $method::$sort = 1;
         return $data;
     }
 }

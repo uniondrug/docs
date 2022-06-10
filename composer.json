@@ -1,27 +1,27 @@
 {
-    "name" : "uniondrug/docs",
-    "description" : "export uniondrug application as documents and postman.json; upload to torna",
-    "keywords" : [
-        "phalcon",
-        "postman"
-    ],
-    "license" : "proprietary",
-    "type" : "library",
-    "authors" : [
-        {
-            "name" : "Uniondrug Dev Team",
-            "email" : "dev@uniondrug.cn"
-        }
-    ],
-    "require" : {
-        "uniondrug/framework" : "^2.0"
-    },
-    "require-dev" : {
-        "uniondrug/console" : "^2.2"
-    },
-    "autoload" : {
-        "psr-4" : {
-            "Uniondrug\\Docs\\" : "src/"
-        }
+  "name": "uniondrug/docs",
+  "description": "export uniondrug application as documents and postman.json; upload documents to torna",
+  "keywords": [
+    "phalcon",
+    "postman"
+  ],
+  "license": "proprietary",
+  "type": "library",
+  "authors": [
+    {
+      "name": "Uniondrug Dev Team",
+      "email": "dev@uniondrug.cn"
     }
+  ],
+  "require": {
+    "uniondrug/framework": "^2.0"
+  },
+  "require-dev": {
+    "uniondrug/console": "^2.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Uniondrug\\Docs\\": "src/"
+    }
+  }
 }

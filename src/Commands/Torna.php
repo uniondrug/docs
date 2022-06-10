@@ -6,7 +6,7 @@ use Uniondrug\Console\Command;
 use Uniondrug\Docs\Parsers\Collection;
 
 /**
- * 上传文档到torna
+ * 上传文档到Torna
  * Class Torna
  * @package Uniondrug\Docs\Commands
  */
@@ -25,19 +25,27 @@ class Torna extends Command
         $this->exportPath = $this->exportPath ?: $path;
         $collection = new Collection($path, $this->exportPath);
         $collection->parser();
-        $this->asTorna($collection);
         $this->toTorna($collection);
+//        $this->asTorna($collection);
     }
 
+    /**
+     * 上传文档到Torna
+     * @param Collection $collection
+     */
+    private function toTorna(Collection $collection)
+    {
+        $collection->toTorna();
+    }
+
+    /**
+     * 保存torna.json
+     * @param Collection $collection
+     */
     private function asTorna(Collection $collection)
     {
-        $contents = $collection->toTorna();
+        $contents = $collection->toTorna(true);
         $collection->saveMarkdown($collection->exportPath . '/' . $collection->publishPostmanTo, 'torna.json', $contents);
     }
 
-    private function toTorna(Collection $collection)
-    {
-        $collection->console->info("正在上传...");
-        $collection->console->info("完成");
-    }
 }
