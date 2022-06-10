@@ -12,7 +12,9 @@ use Uniondrug\Docs\Parsers\Collection;
  */
 class Torna extends Command
 {
-    protected $signature = 'torna';
+    protected $signature = 'torna
+                            {--save=false : 保留torna.json文件}';
+
 
     public $exportPath = '';
 
@@ -26,7 +28,9 @@ class Torna extends Command
         $collection = new Collection($path, $this->exportPath);
         $collection->parser();
         $this->toTorna($collection);
-//        $this->asTorna($collection);
+        if ($this->input->getOption('save')) {
+            $this->asTorna($collection);
+        }
     }
 
     /**

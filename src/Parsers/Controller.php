@@ -177,7 +177,7 @@ class Controller extends Base
     }
 
     /**
-     * 构建Torna中的apis(folder)
+     * 构建Torna中apis的folder(Controller)
      * @return array
      */
     public function toTorna()

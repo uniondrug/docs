@@ -155,18 +155,19 @@ class Parameters
 //                if ($property->annotation->isExecuted) {
 //                    continue;
 //                }
+                $type = trim($property->annotation->type ?? '');
+                $property->annotation->isStructType && $type = 'object';
+                $property->annotation->isArrayType && $type = 'list';
                 $_data = [
                     "name" => trim($property->name ?? ''),
-                    "type" => trim($property->annotation->type ?? ''),
+                    "type" => $type,
                     "required" => $property->annotation->validator->required ?? false,
                     "maxLength" => $property->annotation->validator->options ?? '',
                     "example" => trim($property->annotation->mock ?? ''),
                     "description" => trim($property->annotation->name ?? ''),
                     "children" => $children
                 ];
-
-                // 子级
-//                if ($property->annotation->isStructType) {
+                // 子级递归
                 if (!empty($this->children[$p])) {
                     $_data['children'] = $this->children[$p]->toTorna($input);
                 }

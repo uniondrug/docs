@@ -135,7 +135,7 @@ class Method extends Base
     }
 
     /**
-     * Torna中的一个Action
+     * Torna中的Action
      * @return array
      */
     public function toTorna()
@@ -143,8 +143,8 @@ class Method extends Base
         $data = [
             "name" => trim($this->annotation->name),
             "description" => trim($this->annotation->aliasName),
-            "url" => trim($this->annotation->path),
             "httpMethod" => trim($this->annotation->method),
+            "url" => trim($this->controller->annotation->prefix) . trim($this->annotation->path),
             "contentType" => "application/json;charset=utf-8",
             "isFolder" => 0,
             "isShow" => 1,
@@ -152,7 +152,7 @@ class Method extends Base
             "orderIndex" => self::$sort,
             "headerParams" => [],
             "requestParams" => $this->toTornaRequest(),
-            "responseParams" => [],
+            "responseParams" => $this->toTornaResponse(),
             "isRequestArray" => 0,
             "isResponseArray" => 0,
             "extras" => new \stdClass(),
@@ -245,11 +245,31 @@ class Method extends Base
         }
         // 结构体错误
         if ($this->inputParameter === null) {
-            $this->console->error('> 结构体 `' . $this->annotation->input . '` 不能正确解析');
+            $this->console->error('> 入参结构体 `' . $this->annotation->input . '` 不能正确解析');
             return $data;
         }
         // 解析
         return $this->inputParameter->toTorna(true);
+    }
+
+    /**
+     * TornaAction出参结构体解析
+     * @return array
+     */
+    public function toTornaResponse()
+    {
+        $data = [];
+        // 未定义入参结构体
+        if ($this->annotation->output === '') {
+            return $data;
+        }
+        // 结构体错误
+        if ($this->outputParameter === null) {
+            $this->console->error('> 出参结构体 `' . $this->annotation->output . '` 不能正确解析');
+            return $data;
+        }
+        // 解析
+        return $this->outputParameter->toTorna(true);
     }
 
     public function toPostmanResponse()

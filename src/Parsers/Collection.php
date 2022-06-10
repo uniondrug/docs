@@ -231,6 +231,7 @@ class Collection extends Base
         $token = '099e2154ae6244c6aeae8eb4a235a045';
 
         $this->console->info("正在上传文档到Torna...");
+        $data = $this->toTornaData($save);
         $res = (new \GuzzleHttp\Client())->post($uri, [
             'json' => [
                 "name" => "doc.push",
@@ -239,16 +240,16 @@ class Collection extends Base
                 "project_name" => trim($this->name),
                 "access_token" => $token,
                 "application_name" => trim($this->appName),
-                "data" => urlencode(json_encode($this->toTornaData($save))),
+                "data" => urlencode(json_encode($data)),
 //                "sign" => "60F575C2C0E2D846700F5E59623D43E2",
             ]
         ]);
         $result = json_decode($res->getBody()->__toString(), true);
         if ($result['code'] != 0) {
             $this->console->error("上传Torna出错: " . $result['msg']);
-            return;
         }
         $this->console->info("上传完成");
+        return $data;
     }
 
     /**
