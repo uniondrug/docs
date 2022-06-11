@@ -150,6 +150,16 @@ class Collection extends Base
         return $this->codeMap;
     }
 
+    public function getTornaCodeMap()
+    {
+        if ($this->codeMap === null) {
+            if ($this->codeMap = Code::exportTorna()) {
+                array_multisort(array_column($this->codeMap, 'code'), SORT_ASC, $this->codeMap);
+            }
+        }
+        return (array)$this->codeMap;
+    }
+
     /**
      * 发布Markdown文档
      * 在Collectionk中发布README.md索引文档, 同时

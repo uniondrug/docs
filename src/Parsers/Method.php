@@ -153,6 +153,7 @@ class Method extends Base
             "headerParams" => [],
             "requestParams" => $this->toTornaRequest(),
             "responseParams" => $this->toTornaResponse(),
+            "errorCodeParams" => $this->collection->getTornaCodeMap(),
             "isRequestArray" => 0,
             "isResponseArray" => 0,
             "extras" => new \stdClass(),

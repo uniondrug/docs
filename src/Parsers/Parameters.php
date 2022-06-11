@@ -175,6 +175,7 @@ class Parameters
             }
         } catch (\Exception $e) {
         } finally {
+            array_multisort(array_column($data, 'required'), SORT_DESC, $data);
             return $data;
         }
     }
