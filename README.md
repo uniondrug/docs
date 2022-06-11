@@ -14,7 +14,7 @@
 
     以‘命令2’为例
 
-> 1.在应用 **composer.json** 引入 **uniondrug/docs** 并执行 **composer update**
+> 1.在应用 **composer.json** 中引入 **uniondrug/docs** 并执行 **composer update**
 
 ```
 "require-dev" : {
