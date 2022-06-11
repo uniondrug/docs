@@ -14,7 +14,7 @@
 
     以‘命令2’为例
 
-> 第一步: 在应用 **composer.json** 中引入 **uniondrug/docs** 并执行 **composer update**
+> 第1步: 在应用 **composer.json** 中引入 **uniondrug/docs** 并执行 **composer update**
 
 ```
 "require-dev" : {
@@ -22,7 +22,7 @@
 },
 ```
 
-> 第二步: 自定义命令：可使用 **php console make:command torna** 创建，也可直接在应用程序 **App\Commands** 下创建**TornaCommand.php**
+> 第2步: 自定义命令：可使用 **php console make:command torna** 创建，也可直接在应用程序 **App\Commands** 下创建**TornaCommand.php**
 
 ```
 <?php
@@ -39,7 +39,7 @@ class TornaCommand extends Torna
 }
 ```
 
-> 第三步: 项目目录添加 **docs.json** 配置文件，由于上传文档到 Torna 需要认证，所以此步骤为 <font style="color: red;"><必须></font> (优先级**docs.json** > **postman.json** > **config/app.php**)
+> 第3步: 项目目录添加 **docs.json** 配置文件，由于上传文档到 Torna 需要认证，所以此步骤为 <font style="color: red;"><必须></font> (优先级**docs.json** > **postman.json** > **config/app.php**)
 
 ```
 {
