@@ -262,7 +262,7 @@ class Collection extends Base
         if ($result['code'] != 0) {
             $this->console->error("上传Torna出错: " . $result['msg']);
         } else {
-            $this->console->info("\033[0:32m上传Torna成功!\033[0m");
+            $this->console->info("\033[0:32m上传Torna成功! 文档地址: http://torna.turboradio.cn \033[0m");
         }
         return $data;
     }
