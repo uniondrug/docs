@@ -194,7 +194,7 @@ class Controller extends Base
             $data['items'][] = $method->toTorna();
         }
         self::$sort++;
-        $method::$sort = 1;
+        !empty($method) && ($method::$sort = 1);
         return $data;
     }
 }
