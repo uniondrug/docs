@@ -235,13 +235,13 @@ class Collection extends Base
     /**
      * 上传文档到Torna
      */
-    public function toTorna($save = false)
+    public function toTorna()
     {
         $uri = 'http://ud-torna.turboradio.cn/api';
         $token = '099e2154ae6244c6aeae8eb4a235a045';
 
-        $this->console->info("正在上传文档到Torna...");
-        $data = $this->toTornaData($save);
+        $this->console->info("\033[0:32m开始上传文档到Torna...\033[0m");
+        $data = $this->toTornaData();
         $res = (new \GuzzleHttp\Client())->post($uri, [
             'json' => [
                 "name" => "doc.push",
@@ -257,15 +257,16 @@ class Collection extends Base
         $result = json_decode($res->getBody()->__toString(), true);
         if ($result['code'] != 0) {
             $this->console->error("上传Torna出错: " . $result['msg']);
+        } else {
+            $this->console->info("\033[0:32m上传Torna成功!\033[0m");
         }
-        $this->console->info("上传完成");
         return $data;
     }
 
     /**
      * torna入参中的data节点
      */
-    public function toTornaData($save = false)
+    public function toTornaData()
     {
         $data = [
             "servicePort" => trim($this->serverPort),
@@ -285,7 +286,7 @@ class Collection extends Base
         foreach ($this->controllers as $controller) {
             $data['apis'][] = $controller->toTorna();
         }
-        return $save ? json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : $data;
+        return $data;
     }
 
     /**

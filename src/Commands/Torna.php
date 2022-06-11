@@ -28,9 +28,6 @@ class Torna extends Command
         $collection = new Collection($path, $this->exportPath);
         $collection->parser();
         $this->toTorna($collection);
-        if ($this->input->getOption('save')) {
-            $this->asTorna($collection);
-        }
     }
 
     /**
@@ -39,17 +36,10 @@ class Torna extends Command
      */
     private function toTorna(Collection $collection)
     {
-        $collection->toTorna();
-    }
-
-    /**
-     * 保存torna.json
-     * @param Collection $collection
-     */
-    private function asTorna(Collection $collection)
-    {
-        $contents = $collection->toTorna(true);
-        $collection->saveMarkdown($collection->exportPath . '/' . $collection->publishPostmanTo, 'torna.json', $contents);
+        $contents = $collection->toTorna();
+        if ($this->input->getOption('save')) {
+            $collection->saveMarkdown($collection->exportPath . '/' . $collection->publishPostmanTo, 'torna.json', json_encode($contents, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        }
     }
 
 }
