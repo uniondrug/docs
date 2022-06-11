@@ -89,6 +89,8 @@ class Collection extends Base
     public $codeMap = null;
     private $controllerPath = 'app/Controllers';
     public $sdkx;
+    public $tornaUri = 'http://ud-torna.turboradio.cn/api';
+    public $tornaToken = '';
 
     /**
      * Controller constructor.
@@ -109,6 +111,7 @@ class Collection extends Base
         $this->sdkPath = $json->sdkPath;
         $this->sdkService = $json->sdkService;
         $this->sdkLink = $json->sdkLink;
+        $this->tornaToken = $json->tornaToken;
         $this->sdkx = new Sdkx($this);
         // 2. console
         $this->console->info("{$json->name}, {$json->description}");
@@ -237,18 +240,19 @@ class Collection extends Base
      */
     public function toTorna()
     {
-        $uri = 'http://ud-torna.turboradio.cn/api';
-        $token = '099e2154ae6244c6aeae8eb4a235a045';
-
         $this->console->info("\033[0:32m开始上传文档到Torna...\033[0m");
+        if (empty($this->tornaToken)) {
+            $this->console->error("上传Torna出错: Missing Torna Access Token");
+            return [];
+        }
         $data = $this->toTornaData();
-        $res = (new \GuzzleHttp\Client())->post($uri, [
+        $res = (new \GuzzleHttp\Client())->post($this->tornaUri, [
             'json' => [
                 "name" => "doc.push",
                 "version" => "1.0",
                 "timestamp" => date('Y-m-d H:i:s'),
-                "project_name" => trim($this->name),
-                "access_token" => $token,
+                "project_name" => trim($this->name) . ' [' . trim($this->appName) . ']',
+                "access_token" => $this->tornaToken,
                 "application_name" => trim($this->appName),
                 "data" => urlencode(json_encode($data)),
 //                "sign" => "60F575C2C0E2D846700F5E59623D43E2",
@@ -271,7 +275,7 @@ class Collection extends Base
         $data = [
             "servicePort" => trim($this->serverPort),
             "applicationName" => trim($this->appName),
-            "moduleName" => trim($this->name),
+            "moduleName" => trim($this->name) . ' [' . trim($this->appName) . ']',
             'debugEnvs' => new \stdClass(),
             'apis' => [],
             "commonErrorCodes" => [],
@@ -352,6 +356,7 @@ class Collection extends Base
         $data->sdk = $sdkClass;
         $data->sdkPath = $this->sdkPath($sdkPath);
         $data->sdkService = $this->appName;
+        $data->tornaToken = $this->tornaToken;
         //$data->sdkLink = "https://uniondrug.coding.net/p/".implode(".", $appNameDesc)."/git/blob/development";;
         $data->sdkLink = "https://uniondrug.coding.net/p/" . implode("-", $appNameAsc) . "/git/blob/development";
         // 2. 配置文件优选级
@@ -365,6 +370,20 @@ class Collection extends Base
                 isset($conf->host) && $conf->host !== "" && $data->host = $conf->host;
                 isset($conf->description) && $conf->description !== "" && $data->description = $conf->description;
                 isset($conf->sdkLink) && $conf->sdkLink !== "" && $data->sdkLink = $conf->sdkLink;
+            }
+        }
+        // 3. 配置文件优选级
+        $path = "{$this->basePath}/docs.json";
+        if (file_exists($path)) {
+            $json = file_get_contents($path);
+            $conf = json_decode($json);
+            if (is_object($conf)) {
+                isset($conf->auth) && $conf->auth !== "" && $data->auth = $conf->auth;
+                isset($conf->name) && $conf->name !== "" && $data->name = $conf->name;
+                isset($conf->host) && $conf->host !== "" && $data->host = $conf->host;
+                isset($conf->description) && $conf->description !== "" && $data->description = $conf->description;
+                isset($conf->sdkLink) && $conf->sdkLink !== "" && $data->sdkLink = $conf->sdkLink;
+                isset($conf->tornaToken) && $conf->tornaToken !== "" && $data->tornaToken = $conf->tornaToken;
             }
         }
         return $data;

@@ -37,7 +37,7 @@ class Torna extends Command
     private function toTorna(Collection $collection)
     {
         $contents = $collection->toTorna();
-        if ($this->input->getOption('save')) {
+        if ($this->input->getOption('save') === 'true') {
             $collection->saveMarkdown($collection->exportPath . '/' . $collection->publishPostmanTo, 'torna.json', json_encode($contents, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         }
     }
