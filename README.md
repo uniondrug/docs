@@ -25,7 +25,7 @@
 
 > 第 1 步: 在应用 **composer.json** 中引入 **uniondrug/docs** 并执行 **composer update**
 
-```
+```json
 "require-dev" : {
 	"uniondrug/docs" : "^1.0"
 },
@@ -33,7 +33,7 @@
 
 > 第 2 步: 自定义命令：可使用 **php console make:command torna** 创建，也可直接在应用程序 **App\Commands** 下创建**TornaCommand.php**
 
-```
+```php
 <?php
 namespace App\Commands;
 
@@ -50,7 +50,7 @@ class TornaCommand extends Torna
 
 > 第 3 步: 项目目录添加 **docs.json** 配置文件，由于上传文档到 Torna 需要认证，所以此步骤为 <font style="color: red;"><必须></font> (优先级**docs.json** > **postman.json** > **config/app.php**)
 
-```
+```json
 {
     "name" : "xxx模块", //应用名称,建议使用中文 [可选]
     "description" : "xxx", //应用描述 [可选]
@@ -65,7 +65,7 @@ class TornaCommand extends Torna
 1. **uniondrug/docs** 完整兼容 **uniondrug/postman** 的 **3.x** 版本，建议替换使用（若要替换，参考说明 2）
 2. 若要废弃原 **postman** 命令，应用程序 **App\Commands** 下的 **PostmanCommand::class** 需修改继承为**\Uniondrug\Docs\Commands\Postman**
 
-```
+```php
 <?php
 namespace App\Commands;
 
