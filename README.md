@@ -48,7 +48,7 @@ class TornaCommand extends Torna
 }
 ```
 
-> 第 3 步: 项目目录添加 **docs.json** 配置文件，在原postman.json基础上增加tornaToken配置。由于上传文档到 Torna 需要认证，所以此步骤为 <必须> (优先级为: **docs.json** > **postman.json** > **config/app.php**)
+> 第 3 步: 项目目录添加 **docs.json** 配置文件，在原 **postman.json** 基础上增加tornaToken配置。由于上传文档到 Torna 需要认证，所以此步骤为 <必须> (优先级为: **docs.json** > **postman.json** > **config/app.php**)
 
 ```json
 {
