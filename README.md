@@ -8,7 +8,7 @@
 
 > 命令 2：**_php console torna_**
 
-    上传文档到Torna，可在Torna查看并管理，地址：http://torna.turboradio.cn/
+    上传文档到Torna，可在Torna查看并管理，地址：http://torna.uniondrug.cn/
 
 *options*
 
