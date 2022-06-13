@@ -14,10 +14,8 @@
 
 ![](http://uniondrug.oss-cn-hangzhou.aliyuncs.com/backend.assistant.manage/rc83ju4rsu2ef6mei7rdc4mma1.png)
 
-```
-新增的 [--save=true] 可保留Torna.json文件（用于调试）
+    注: 新增的options选项 [--save=true] 可保留Torna.json文件（用于调试）
 
-```
 
 ### 如何使用
 
@@ -26,9 +24,7 @@
 > 第 1 步: 在应用 **composer.json** 中引入 **uniondrug/docs** 并执行 **composer update**
 
 ```json
-"require-dev" : {
-	"uniondrug/docs" : "^1.0"
-},
+  "uniondrug/docs" : "^1.0"
 ```
 
 > 第 2 步: 自定义命令：可使用 **php console make:command torna** 创建，也可直接在应用程序 **App\Commands** 下创建**TornaCommand.php**
