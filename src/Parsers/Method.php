@@ -270,8 +270,19 @@ class Method extends Base
             return $data;
         }
         // 解析
-        return $this->outputParameter->toTorna(true);
+        return $this->toTornaResponseObject($this->outputParameter->toTorna(true));
     }
+
+    private function toTornaResponseObject($body)
+    {
+        return [
+            ["name" => "errno", "type" => "int", "example" => 0],
+            ["name" => "error", "type" => "string", "example" => ""],
+            ["name" => "dataType", "type" => "string", "example" => "OBJECT"],
+            ["name" => "data", "type" => "object", "example" => 0, "children" => $body]
+        ];
+    }
+
 
     public function toPostmanResponse()
     {

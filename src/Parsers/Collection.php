@@ -89,7 +89,7 @@ class Collection extends Base
     public $codeMap = null;
     private $controllerPath = 'app/Controllers';
     public $sdkx;
-    public $tornaUri = 'http://ud-torna.turboradio.cn/api';
+    public $tornaUri = 'http://ud-torna.uniondrug.cn/api';
     public $tornaToken = '';
 
     /**
@@ -266,7 +266,7 @@ class Collection extends Base
         if ($result['code'] != 0) {
             $this->console->error("上传Torna出错: " . $result['msg']);
         } else {
-            $this->console->info("\033[0:32m上传Torna成功! 文档地址: http://torna.turboradio.cn \033[0m");
+            $this->console->info("\033[0:32m上传Torna成功! 文档地址: http://torna.uniondrug.cn \033[0m");
         }
         return $data;
     }
