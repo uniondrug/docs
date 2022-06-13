@@ -2,7 +2,6 @@
 
 namespace Uniondrug\Docs\Parsers;
 
-use App\Errors\Code;
 use Phalcon\Di;
 use Uniondrug\Docs\Parsers\Abstracts\Base;
 use Uniondrug\Framework\Container;
@@ -86,6 +85,7 @@ class Collection extends Base
      * @var string
      */
     public $exportPath;
+    public static $codeClass = '\App\Errors\Code';
     public $codeMap = null;
     private $controllerPath = 'app/Controllers';
     public $sdkx;
@@ -153,14 +153,18 @@ class Collection extends Base
         return $this->codeMap;
     }
 
+    /**
+     * Torna错误码编码
+     * @return array
+     */
     public function getTornaCodeMap()
     {
         if ($this->codeMap === null) {
-            if ($this->codeMap = Code::exportTorna()) {
+            if (class_exists(self::$codeClass) && $this->codeMap = Code::exportTorna()) {
                 array_multisort(array_column($this->codeMap, 'code'), SORT_ASC, $this->codeMap);
             }
         }
-        return (array)$this->codeMap;
+        return $this->codeMap;
     }
 
     /**
