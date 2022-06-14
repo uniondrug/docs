@@ -276,6 +276,8 @@ class Collection extends Base
      */
     public function toTornaData()
     {
+        $gitUrl = exec('git ls-remote --get-url origin');
+        $gitHttpUrl = str_replace(':36022', '', str_replace('ssh://git@', 'https://', $gitUrl));
         $data = [
             "servicePort" => trim($this->serverPort),
             "applicationName" => trim($this->appName),
@@ -286,8 +288,8 @@ class Collection extends Base
             "author" => exec('git config user.name'),
             "isReplace" => 1,
             "domain" => $this->host,
-            "gitUrl" => "", //git ls-remote --get-url origin
-            "gitHttpUrl" => "",
+            "gitUrl" => $gitUrl,
+            "gitHttpUrl" => $gitHttpUrl,
             "language" => "PHP",
             "softwareVersion" => phpversion()
         ];
