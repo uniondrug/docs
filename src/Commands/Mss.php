@@ -62,7 +62,7 @@ class Mss extends Command
         if ($this->input->getOption('rename') === 'true') {
             $collection = new Collection($path, '');
             $collection->parser();
-            $this->rename($collection->toTorna());
+            $this->rename($collection->toTorna(false));
         }
     }
 

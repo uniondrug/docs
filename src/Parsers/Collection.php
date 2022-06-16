@@ -242,7 +242,7 @@ class Collection extends Base
     /**
      * 上传文档到Torna
      */
-    public function toTorna()
+    public function toTorna($upload = true)
     {
         $this->console->info("\033[0:32m开始上传文档到Torna...\033[0m");
         if (empty($this->tornaToken)) {
@@ -250,6 +250,9 @@ class Collection extends Base
             return [];
         }
         $data = $this->toTornaData();
+        if (!$upload) {
+            return $data;
+        }
         $res = (new \GuzzleHttp\Client())->post($this->tornaUri, [
             'json' => [
                 "name" => "doc.push",
