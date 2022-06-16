@@ -1,4 +1,10 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: kang.xiaoqiang
+ * Date: 2022/6/8
+ * Time: 14:21
+ */
 
 namespace Uniondrug\Docs\Commands;
 

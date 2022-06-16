@@ -1,4 +1,10 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * User: kang.xiaoqiang
+ * Date: 2022/6/15
+ * Time: 14:21
+ */
 
 namespace Uniondrug\Docs\Commands;
 
@@ -14,6 +20,9 @@ class Mss extends Command
     protected $signature = 'mss
                             {--projectId=0 : 项目ID}
                             {--upload=false : 上传到Mss}';
+
+
+    protected $controllerPath = 'app/Controllers';
 
     protected $projectId = 0; //mss中你的项目ID
 
@@ -36,7 +45,6 @@ class Mss extends Command
         $this->init();
         $mss = $this->scanner();
         if ($this->input->getOption('upload') === 'true') {
-            file_put_contents('1_mss.json', json_encode($mss, 256));
             $this->toMss($mss);
         }
     }
@@ -124,7 +132,7 @@ class Mss extends Command
      */
     protected function scanner()
     {
-        $path = getcwd();
+        $path = getcwd() . '/' . $this->controllerPath;
         $length = strlen($path);
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::SELF_FIRST);
         foreach ($iterator as $info) {
@@ -135,7 +143,7 @@ class Mss extends Command
             if (preg_match("/^[_a-zA-Z0-9]+Controller\.php$/", $name) === 0) {
                 continue;
             }
-            $class = ucfirst(substr($info->getPathname(), $length + 1, -4));
+            $class = '\\App\\Controllers\\' . substr($info->getPathname(), $length + 1, -4);
             $controllerMap[] = $class;
         }
         return $this->parserController($controllerMap);
