@@ -33,7 +33,11 @@ class Mss extends Command
 
     protected $userName = 'Auto'; //姓名
 
+    protected $token = ''; //access token
+
     protected $userId = 0; //mss用户ID
+
+    protected $mssToken = ''; //mss用户token
 
     protected $sdkMap = [];
 
@@ -462,7 +466,11 @@ class Mss extends Command
     private function post($url, $data)
     {
         $res = $this->httpClient->post($url, [
-            'json' => $data
+            'json' => $data,
+            'headers' => [
+                'Content-type' => 'application/json',
+                'Authorization' => 'Bearer ' . $this->mssToken,
+            ]
         ]);
         $res = json_decode($res->getBody()->__toString(), 1);
         if ($res['errno'] != 0) {
