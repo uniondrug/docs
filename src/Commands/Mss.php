@@ -287,6 +287,9 @@ class Mss extends Command
             if (!$serviceClass = $this->serviceMap[$serviceName] ?? '') {
                 continue;
             }
+            if (!class_exists($serviceClass)) {
+                continue;
+            }
             $reflect = new \ReflectionClass($serviceClass);
             foreach ($reflect->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
                 if ($action != $method->name) {
