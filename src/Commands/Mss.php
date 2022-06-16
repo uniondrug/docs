@@ -174,7 +174,7 @@ class Mss extends Command
                         "apiUrl" => $action['url'],
                         "accessType" => $this->accessType,
                         "accessTypeText" => "",
-                        "apiLevel" => "L3",
+                        "apiLevel" => "L2",
                         "apiLevelText" => "",
                         "concurrency" => "0",
                         "performance" => "0",
