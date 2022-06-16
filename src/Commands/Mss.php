@@ -52,7 +52,6 @@ class Mss extends Command
     /**
      * 上传到mss
      * @param $mss
-     * @throws Error
      */
     protected function toMss($mss)
     {
@@ -74,7 +73,7 @@ class Mss extends Command
         // 2. 拉取Mss接口列表
         $mssActions = $this->post($this->pagingUrl, [
             "page" => 1,
-            "limit" => 999, //查一下
+            "limit" => 600, //查一下
             "projectId" => $this->projectId
         ]);
         if (empty($mssActions['body'])) {
@@ -159,6 +158,9 @@ class Mss extends Command
         $mss = [];
         foreach ($controllerMap as $class) {
             $class = str_replace("/", "\\", $class);
+            if (!class_exists($class)) {
+                continue;
+            }
             $reflect = new \ReflectionClass($class);
             $classFile = $reflect->getFileName();
 
