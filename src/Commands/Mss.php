@@ -519,14 +519,24 @@ class Mss extends Command
 
         // sdk映射
         $moduleTraitReflect = new \ReflectionClass('Uniondrug\ServiceSdk\Traits\ModuleTrait');
-        if (!preg_match_all('/@property\s*([\w\\\w]+)\s*\$([\w]+)/', $moduleTraitReflect->getDocComment(), $matches)) {
-            $this->error('ERROR: 先把sdk更新下来 composer update');
+        if (!preg_match_all('/@property\s*([\w\\\\]+)\s*\$([\w]+)/', $moduleTraitReflect->getDocComment(), $matches)) {
+            $this->error('ERROR: 检查一下 Uniondrug\ServiceSdk\Traits\ModuleTrait');
+            exit;
         }
         $this->sdkMap = array_combine($matches[2], $matches[1]);
+        foreach ($this->sdkMap as &$v) {
+            if (!preg_match('/\\\\/', $v)) {
+                $v = '\Uniondrug\ServiceSdk\Exports\Modules\\' . $v;
+                if (!class_exists($v)) {
+                    $this->error("ERROR: Class不存在 {$v}");
+                    exit;
+                }
+            }
+        }
 
         // service映射
         $serviceTraitReflect = new \ReflectionClass('App\Services\Abstracts\ServiceTrait');
-        if (!preg_match_all('/@property\s*([\w\\\w]+)\s*\$([\w]+)/', $serviceTraitReflect->getDocComment(), $matches)) {
+        if (!preg_match_all('/@property\s*([\w\\\\]+)\s*\$([\w]+)/', $serviceTraitReflect->getDocComment(), $matches)) {
             $this->error('ERROR: 检查ServiceTrait是否规范');
             exit;
         }
