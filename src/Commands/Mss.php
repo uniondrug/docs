@@ -223,7 +223,7 @@ class Mss extends Command
      */
     protected function scanner($path)
     {
-        $path . '/' . $this->controllerPath;
+        $path = $path . '/' . $this->controllerPath;
         $length = strlen($path);
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::SELF_FIRST);
         foreach ($iterator as $info) {
