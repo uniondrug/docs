@@ -259,7 +259,7 @@ class Mss extends Command
                     continue;
                 }
                 // 例: return $this->restful("POST", "/orderStatistic/distribution", $body, $query, $extra);
-                if (preg_match('/return\s*\$this->restful\(\"(POST|GET)\",\s*\"([\/a-zA-Z]+)\",/', $actionTxt, $matches)) {
+                if (preg_match('/return\s*\$this->restful\(\"(POST|GET)\",\s*\"([\/\w]+)\",/', $actionTxt, $matches)) {
                     $sdks[$sdkName . $matches[2]] = [
                         'sdkName' => $sdkName,
                         'sdkClass' => $sdkClass,
