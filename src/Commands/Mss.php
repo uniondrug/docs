@@ -485,11 +485,17 @@ class Mss extends Command
             $this->error("ERROR: 项目不存在");
             exit;
         }
-        $gitUrl = exec('git ls-remote --get-url origin');
-        $gitHttpUrl = str_replace(':36022', '', str_replace('ssh://git@', 'https://', $gitUrl));
-        if ($detailData['projectCodeUrl'] != substr($gitHttpUrl, 0, -4)) {
-            $this->info($detailData['projectCodeUrl']);
-            $this->info(substr($gitHttpUrl, 0, -4));
+
+//        $gitUrl = exec('git ls-remote --get-url origin');
+//        $gitHttpUrl = str_replace(':36022', '', str_replace('ssh://git@', 'https://', $gitUrl));
+//        if ($detailData['projectCodeUrl'] != substr($gitHttpUrl, 0, -4)) {
+//            $this->info($detailData['projectCodeUrl']);
+//            $this->info(substr($gitHttpUrl, 0, -4));
+//            $this->error("ERROR: projectId与当前项目不一致");
+//            exit;
+//        }
+        $appName = app()->getConfig()->path('app.appName');
+        if ($detailData['projectCode'] != $appName) {
             $this->error("ERROR: projectId与当前项目不一致");
             exit;
         }
