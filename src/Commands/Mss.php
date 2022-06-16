@@ -27,9 +27,11 @@ class Mss extends Command
 
     protected $controllerPath = 'app/Controllers';
 
-    protected $projectId = 0; //mss中你的项目ID
+    private $projectId = 0; //mss中你的项目ID
 
     protected $accessType = 1; //1内网 2外网
+
+    protected $apiLevel = 'L2'; //1交易流程 2非交易类核心业务流程 3非核心业务流程 4统计分析类业务
 
     protected $userName = 'Auto'; //姓名
 
@@ -59,8 +61,8 @@ class Mss extends Command
     {
         $this->init();
         $path = getcwd();
+        $mss = $this->scanner($path);
         if ($this->input->getOption('upload') === 'true') {
-            $mss = $this->scanner($path);
             $this->toMss($mss);
         }
         if ($this->input->getOption('rename') === 'true') {
@@ -178,7 +180,7 @@ class Mss extends Command
                         "apiUrl" => $action['url'],
                         "accessType" => $this->accessType,
                         "accessTypeText" => "",
-                        "apiLevel" => "L2",
+                        "apiLevel" => $this->apiLevel,
                         "apiLevelText" => "",
                         "concurrency" => "0",
                         "performance" => "0",
@@ -227,6 +229,7 @@ class Mss extends Command
      */
     protected function scanner($path)
     {
+        $this->info('开始扫描目录...');
         $path = $path . '/' . $this->controllerPath;
         $length = strlen($path);
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::SELF_FIRST);
@@ -241,6 +244,8 @@ class Mss extends Command
             $class = '\\App\\Controllers\\' . substr($info->getPathname(), $length + 1, -4);
             $controllerMap[] = $class;
         }
+        sleep(1);
+        $this->info('结束扫描目录...');
         return $this->parserController($controllerMap);
     }
 
@@ -474,7 +479,7 @@ class Mss extends Command
         ]);
         $res = json_decode($res->getBody()->__toString(), 1);
         if ($res['errno'] != 0) {
-            $this->error("请求Error:{$res['error']}");
+            $this->error("请求mss接口Error:{$res['error']}");
             exit;
         }
         return $res['data'];
@@ -484,7 +489,11 @@ class Mss extends Command
     protected function init()
     {
         if (!$this->projectId = $this->input->getOption('projectId')) {
-            $this->error('ERROR: 未指定项目projectId');
+            $this->error('ERROR: projectId 缺失');
+            exit;
+        }
+        if (!$this->mssToken) {
+            $this->error('ERROR: mssToken 缺失');
             exit;
         }
         // 1. 验证
@@ -507,28 +516,36 @@ class Mss extends Command
             $this->error("ERROR: projectId与当前项目不一致");
             exit;
         }
+
+        // sdk映射
         $moduleTraitReflect = new \ReflectionClass('Uniondrug\ServiceSdk\Traits\ModuleTrait');
         if (!preg_match_all('/@property\s*([\w\\\w]+)\s*\$([\w]+)/', $moduleTraitReflect->getDocComment(), $matches)) {
             $this->error('ERROR: 先把sdk更新下来 composer update');
         }
-        $this->sdkMap = array_combine($matches[2], $matches[1]); //sdk映射
+        $this->sdkMap = array_combine($matches[2], $matches[1]);
+
+        // service映射
         $serviceTraitReflect = new \ReflectionClass('App\Services\Abstracts\ServiceTrait');
         if (!preg_match_all('/@property\s*([\w\\\w]+)\s*\$([\w]+)/', $serviceTraitReflect->getDocComment(), $matches)) {
             $this->error('ERROR: 检查ServiceTrait是否规范');
             exit;
         }
-        $this->serviceMap = array_combine($matches[2], $matches[1]); //sdk映射
+        $this->serviceMap = array_combine($matches[2], $matches[1]);
         if (!preg_match_all('/use\s+([^;]+)\S/', file_get_contents($serviceTraitReflect->getFileName()), $matches)) {
             $this->error('ERROR: 检查ServiceTrait是否规范');
             exit;
         }
+        $serviceNameToServiceClass = [];
         foreach ($matches[1] as $serviceClass) {
             $tmp = explode("\\", $serviceClass);
-            $tmpArr[end($tmp)] = $serviceClass;
+            $serviceNameToServiceClass[end($tmp)] = $serviceClass;
         }
         foreach ($this->serviceMap as $serviceName => &$_serviceName) {
-            if (!empty($tmpArr[$_serviceName])) {
-                $_serviceName = $tmpArr[$_serviceName];
+            if (!empty($serviceNameToServiceClass[$_serviceName])) {
+                $_serviceName = $serviceNameToServiceClass[$_serviceName];
+            } else {
+                $this->error("ERROR: 未找对对应的Class, {$_serviceName}");
+                exit;
             }
         }
     }
