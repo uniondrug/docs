@@ -10,8 +10,10 @@ namespace Uniondrug\Docs\Commands;
 
 use Uniondrug\Console\Command;
 use Uniondrug\Docs\Parsers\Annotation;
+use Uniondrug\Docs\Parsers\Collection;
 
 /**
+ * 同步Mss
  * Class Mss
  * @package Uniondrug\Docs\Commands
  */
@@ -19,12 +21,19 @@ class Mss extends Command
 {
     protected $signature = 'mss
                             {--projectId=0 : 项目ID}
+                            {--rename=false : 修改方法名称}
                             {--upload=false : 上传到Mss}';
 
 
     protected $controllerPath = 'app/Controllers';
 
     protected $projectId = 0; //mss中你的项目ID
+
+    protected $accessType = 1; //1内网 2外网
+
+    protected $userName = 'Auto'; //姓名
+
+    protected $userId = 0; //mss用户ID
 
     protected $sdkMap = [];
 
@@ -36,6 +45,8 @@ class Mss extends Command
 
     protected $createUrl = 'http://pm-dev-manage.uniondrug.cn/projectCallApi/create';
 
+    protected $renameUrl = 'http://pm-dev-manage.uniondrug.cn/api/update';
+
     /**
      * @return mixed|void
      * @throws \Exception
@@ -43,9 +54,15 @@ class Mss extends Command
     public function handle()
     {
         $this->init();
-        $mss = $this->scanner();
+        $path = getcwd();
         if ($this->input->getOption('upload') === 'true') {
+            $mss = $this->scanner($path);
             $this->toMss($mss);
+        }
+        if ($this->input->getOption('rename') === 'true') {
+            $collection = new Collection($path, '');
+            $collection->parser();
+            $this->rename($collection->toTorna());
         }
     }
 
@@ -56,20 +73,6 @@ class Mss extends Command
     protected function toMss($mss)
     {
         $this->info('开始同步Mss...');
-        // 1. 验证
-        $detailData = $this->post($this->detailUrl, ['id' => $this->projectId]);
-        if (empty($detailData)) {
-            $this->error("ERROR: 项目不存在");
-            exit;
-        }
-        $gitUrl = exec('git ls-remote --get-url origin');
-        $gitHttpUrl = str_replace(':36022', '', str_replace('ssh://git@', 'https://', $gitUrl));
-        if ($detailData['projectCodeUrl'] != substr($gitHttpUrl, 0, -4)) {
-            $this->info($detailData['projectCodeUrl']);
-            $this->info(substr($gitHttpUrl, 0, -4));
-            $this->error("ERROR: projectId与当前项目不一致");
-            exit;
-        }
         // 2. 拉取Mss接口列表
         $mssActions = $this->post($this->pagingUrl, [
             "page" => 1,
@@ -125,13 +128,102 @@ class Mss extends Command
     }
 
     /**
+     * 修改方法名称
+     * @param $torna
+     */
+    protected function rename($torna)
+    {
+        $this->info('开始同步Mss...');
+        // 1. 拉取Mss接口列表
+        $mssActions = $this->post($this->pagingUrl, [
+            "page" => 1,
+            "limit" => 600, //查一下
+            "projectId" => $this->projectId
+        ]);
+        if (empty($mssActions['body'])) {
+            $this->error("ERROR: 没有可操作的数据");
+            exit;
+        }
+        if ($mssActions['paging']['totalItems'] > 500) {
+            $this->error("ERROR: 接口太多了");
+            exit;
+        }
+
+        // 2. 修改名字
+        $params = [];
+        foreach ($mssActions['body'] as $mssAction) {
+            foreach ($torna['apis'] as $api) {
+                if (empty($api['items'])) {
+                    continue;
+                }
+                foreach ($api['items'] as $action) {
+                    if (empty($action['url'])) {
+                        continue;
+                    }
+                    if ($mssAction['apiUrl'] != $action['url']) {
+                        continue;
+                    }
+                    // 组织数据
+                    $params[] = [
+                        "id" => $mssAction['id'],
+                        "projectId" => $this->projectId,
+                        "projectCode" => "",
+                        "apiCode" => "",
+                        "apiName" => $action['name'],
+                        "domain" => '',
+                        "apiUrl" => $action['url'],
+                        "accessType" => $this->accessType,
+                        "accessTypeText" => "",
+                        "apiLevel" => "L3",
+                        "apiLevelText" => "",
+                        "concurrency" => "0",
+                        "performance" => "0",
+                        "isThirdResources" => "0",
+                        "isThirdResourcesText" => "否",
+                        "isLowerGrade" => "0",
+                        "isLowerGradeText" => "否",
+                        "onlineTime" => "",
+                        "offlineTime" => "",
+                        "status" => "1",
+                        "statusText" => "有效",
+                        "operator" => "",
+                        "operatorMemberId" => "0",
+                        "paramMethod" => "1",
+                        "paramMethodText" => "普通",
+                        "faultLevel" => "",
+                        "notice" => "",
+                        "alarmTime" => "",
+                        "alarmConfigure" => "",
+                        "alarmLevel" => "",
+                        "alarmLevelText" => "",
+                        "apiSource" => "2",
+                        "apiSourceText" => "",
+                        "isTask" => "0",
+                        "isTaskText" => "",
+                        "cron" => "",
+                        "gmtLastcalled" => "2022-06-13",
+                        "workerName" => $this->userName,
+                        "memberId" => $this->userId
+                    ];
+                }
+            }
+        }
+        if ($params) {
+            foreach ($params as $param) {
+                $this->post($this->renameUrl, $param);
+            }
+        }
+        $this->info('结束同步Mss...');
+    }
+
+    /**
      * 扫描目录
      * @param $path
      * @throws \Exception
      */
-    protected function scanner()
+    protected function scanner($path)
     {
-        $path = getcwd() . '/' . $this->controllerPath;
+        $path . '/' . $this->controllerPath;
         $length = strlen($path);
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::SELF_FIRST);
         foreach ($iterator as $info) {
@@ -385,6 +477,20 @@ class Mss extends Command
     {
         if (!$this->projectId = $this->input->getOption('projectId')) {
             $this->error('ERROR: 未指定项目projectId');
+            exit;
+        }
+        // 1. 验证
+        $detailData = $this->post($this->detailUrl, ['id' => $this->projectId]);
+        if (empty($detailData)) {
+            $this->error("ERROR: 项目不存在");
+            exit;
+        }
+        $gitUrl = exec('git ls-remote --get-url origin');
+        $gitHttpUrl = str_replace(':36022', '', str_replace('ssh://git@', 'https://', $gitUrl));
+        if ($detailData['projectCodeUrl'] != substr($gitHttpUrl, 0, -4)) {
+            $this->info($detailData['projectCodeUrl']);
+            $this->info(substr($gitHttpUrl, 0, -4));
+            $this->error("ERROR: projectId与当前项目不一致");
             exit;
         }
         $moduleTraitReflect = new \ReflectionClass('Uniondrug\ServiceSdk\Traits\ModuleTrait');
