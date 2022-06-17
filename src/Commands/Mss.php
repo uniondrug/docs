@@ -117,7 +117,7 @@ class Mss extends Command
                             "domain" => $sdk['sdkDomain'],
                             "url" => $sdk['sdkPath'],
                             "thirdFlag" => 0,
-                            "apiDesc" => "",
+                            "apiDesc" => $sdk['sdkDescription'],
                             "workerName" => "Auto",
                             "memberId" => ""
                         ];
@@ -369,12 +369,15 @@ class Mss extends Command
                 if (!$actionTxt = $this->readFileByLine($reflect->getFileName(), $method->getStartLine(), $method->getEndLine())) {
                     continue;
                 }
+                $annotation = new Annotation($method);
+                $annotation->info();
                 // 例: return $this->restful("POST", "/orderStatistic/distribution", $body, $query, $extra);
                 if (preg_match('/return\s*\$this->restful\(\"(POST|GET)\",\s*\"([\/\w]+)\",/', $actionTxt, $matches)) {
                     $sdks[$sdkName . $matches[2]] = [
                         'sdkName' => $sdkName,
                         'sdkClass' => $sdkClass,
                         'sdkMethod' => $matches[1],
+                        'sdkDescription' => $annotation->name,
                         'sdkPath' => $matches[2],
                         'sdkDomain' => $reflect->getDefaultProperties()['serviceName'] . '.uniondrug.cn'
                     ];
