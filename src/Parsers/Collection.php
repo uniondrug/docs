@@ -244,11 +244,11 @@ class Collection extends Base
      */
     public function toTorna($upload = true)
     {
-        $this->console->info("\033[0:32m开始上传文档到Torna...\033[0m");
         $data = $this->toTornaData();
         if (!$upload) {
             return $data;
         }
+        $this->console->info("\033[0:32m开始上传文档到Torna...\033[0m");
         if (empty($this->tornaToken)) {
             $this->console->error("上传Torna出错: Missing Torna Access Token");
             return [];
