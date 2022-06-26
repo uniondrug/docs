@@ -303,6 +303,32 @@ class Collection extends Base
     }
 
     /**
+     * 构建Mss入参
+     */
+    public function toMssData($mss)
+    {
+        $data = [
+            "applicationName" => trim($this->appName),
+            "moduleName" => trim($this->name) . ' [' . trim($this->appName) . ']',
+            "projectId" => $mss->projectId,
+            "accessType" => $mss->accessType,
+            "apiLevel" => $mss->apiLevel,
+            "apiSource" => 1,
+            "paramMethod" => 1,
+            "status" => 1,
+//            "memberId" => $mss->userId,
+//            "operator" => $mss->userName,
+//            "workerName" => $mss->userName,
+//            "domain" => trim($this->appName) . '.uniondrug.cn',
+            'apis' => [],
+        ];
+        foreach ($this->controllers as $controller) {
+            $data['apis'] = array_merge($data['apis'], $controller->toMss());
+        }
+        return $data;
+    }
+
+    /**
      * JSON配置文件
      * @return \stdClass
      */

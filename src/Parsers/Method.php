@@ -52,6 +52,7 @@ class Method extends Base
 
     /**
      * 执行解析
+     * @throws \Exception
      */
     public function parser()
     {
@@ -167,6 +168,19 @@ class Method extends Base
         ];
         self::$sort++;
         return $data;
+    }
+
+    /**
+     * Mss中的Action
+     * @return array
+     */
+    public function toMss($controllerName)
+    {
+        return [
+            "apiName" => trim($this->annotation->name) . "【{$controllerName}】",
+            "method" => trim($this->annotation->method),
+            "apiUrl" => trim($this->controller->annotation->prefix) . trim($this->annotation->path),
+        ];
     }
 
     public function toPostmanEvent()

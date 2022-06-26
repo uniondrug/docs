@@ -17,27 +17,29 @@ use Uniondrug\Docs\Parsers\Collection;
  * Class Mss
  * @package Uniondrug\Docs\Commands
  */
-class Mss extends Command
+class MssBak extends Command
 {
     protected $signature = 'mss
                             {--projectId=0 : 项目ID}
+                            {--rename=false : 修改方法名称}
                             {--upload=false : 上传到Mss}';
 
 
     protected $controllerPath = 'app/Controllers';
 
+    private $projectId = 0; //mss中你的项目ID
 
-    public $projectId = 0; //mss中你的项目ID
+    protected $accessType = 1; //1内网 2外网
 
-    public $accessType = 1; //1内网 2外网
+    protected $apiLevel = 'L2'; //1交易流程 2非交易类核心业务流程 3非核心业务流程 4统计分析类业务
 
-    public $apiLevel = 'L2'; //1交易流程 2非交易类核心业务流程 3非核心业务流程 4统计分析类业务
+    protected $userName = 'Auto'; //姓名
 
-//    public $userName = 'Auto'; //姓名
+    protected $token = ''; //access token
 
-//    public $userId = 0; //mss用户ID
+    protected $userId = 0; //mss用户ID
 
-    public $mssToken = ''; //mss用户token
+    protected $mssToken = ''; //mss用户token
 
     protected $sdkMap = [];
 
@@ -45,7 +47,11 @@ class Mss extends Command
 
     protected $detailUrl = 'http://pm-dev-manage.uniondrug.cn/project/detail';
 
-    protected $uploadUrl = 'http://pm-dev-manage.uniondrug.cn/api/import';
+    protected $pagingUrl = 'http://pm-dev-manage.uniondrug.cn/api/page';
+
+    protected $createUrl = 'http://pm-dev-manage.uniondrug.cn/projectCallApi/create';
+
+    protected $renameUrl = 'http://pm-dev-manage.uniondrug.cn/api/update';
 
     /**
      * @return mixed|void
@@ -55,41 +61,164 @@ class Mss extends Command
     {
         $this->init();
         $path = getcwd();
-        $sdks = $this->scanner($path);
+        $mss = $this->scanner($path);
         if ($this->input->getOption('upload') === 'true') {
+            $this->toMss($mss);
+        }
+        if ($this->input->getOption('rename') === 'true') {
             $collection = new Collection($path, '');
             $collection->parser();
-            $apis = $collection->toMssData($this);
-            $this->upload($apis, $sdks);
+            $this->rename($collection->toTorna(false));
         }
     }
 
     /**
      * 上传到mss
-     * @param $apis
-     * @param $sdks
+     * @param $mss
      */
-    protected function upload($apis, $sdks)
+    protected function toMss($mss)
     {
-        $this->info('结束扫描目录...');
-        sleep(1);
         $this->info('开始同步Mss...');
-        sleep(1);
-        //
-        if (empty($apis['apis'])) {
-            $this->error("ERROR: 没有扫描到接口");
+        // 2. 拉取Mss接口列表
+        $mssActions = $this->post($this->pagingUrl, [
+            "page" => 1,
+            "limit" => 600, //查一下
+            "projectId" => $this->projectId
+        ]);
+        if (empty($mssActions['body'])) {
+            $this->error("ERROR: 没有可操作的数据");
             exit;
         }
-        // 合并
-        foreach ($apis['apis'] as &$api) {
-            foreach ($sdks as $sdk) {
-                if ($api['apiUrl'] == $sdk['path']) {
-                    $api['sdks'] = $sdk['sdks'];
+        if ($mssActions['paging']['totalItems'] > 500) {
+            $this->error("ERROR: 接口太多了");
+            exit;
+        }
+
+        // 3. 上传Mss
+        $params = [];
+        foreach ($mssActions['body'] as $mssAction) {
+            foreach ($mss as $controller) {
+                if (empty($controller['actions'])) {
+                    continue;
+                }
+                foreach ($controller['actions'] as $action) {
+                    if (empty($action['sdks'])) {
+                        continue;
+                    }
+                    if ($mssAction['apiUrl'] != $controller['prefix'] . $action['uri']) {
+                        continue;
+                    }
+                    // 组织数据
+                    foreach ($action['sdks'] as $sdk) {
+                        $params[] = [
+                            "id" => "",
+                            "projectId" => $this->projectId,
+                            "projectApiId" => $mssAction['id'],
+                            "domain" => $sdk['sdkDomain'],
+                            "url" => $sdk['sdkPath'],
+                            "thirdFlag" => 0,
+                            "apiDesc" => $sdk['sdkDescription'],
+                            "workerName" => "Auto",
+                            "memberId" => ""
+                        ];
+                    }
                 }
             }
         }
-        // 同步
-        $this->post($this->uploadUrl, $apis);
+        if ($params) {
+            foreach ($params as $param) {
+                $this->post($this->createUrl, $param);
+            }
+        }
+        $this->info('结束同步Mss...');
+    }
+
+    /**
+     * 修改方法名称
+     * @param $torna
+     */
+    protected function rename($torna)
+    {
+        $this->info('开始同步Mss...');
+        // 1. 拉取Mss接口列表
+        $mssActions = $this->post($this->pagingUrl, [
+            "page" => 1,
+            "limit" => 600, //查一下
+            "projectId" => $this->projectId
+        ]);
+        if (empty($mssActions['body'])) {
+            $this->error("ERROR: 没有可操作的数据");
+            exit;
+        }
+        if ($mssActions['paging']['totalItems'] > 500) {
+            $this->error("ERROR: 接口太多了");
+            exit;
+        }
+
+        // 2. 修改名字
+        $params = [];
+        foreach ($mssActions['body'] as $mssAction) {
+            foreach ($torna['apis'] as $api) {
+                if (empty($api['items'])) {
+                    continue;
+                }
+                foreach ($api['items'] as $action) {
+                    if (empty($action['url'])) {
+                        continue;
+                    }
+                    if ($mssAction['apiUrl'] != $action['url']) {
+                        continue;
+                    }
+                    // 组织数据
+                    $params[] = [
+                        "id" => $mssAction['id'],
+                        "projectId" => $this->projectId,
+                        "projectCode" => "",
+                        "apiCode" => "",
+                        "apiName" => $action['name'],
+                        "domain" => '',
+                        "apiUrl" => $action['url'],
+                        "accessType" => $this->accessType,
+                        "accessTypeText" => "",
+                        "apiLevel" => $this->apiLevel,
+                        "apiLevelText" => "",
+                        "concurrency" => "0",
+                        "performance" => "0",
+                        "isThirdResources" => "0",
+                        "isThirdResourcesText" => "否",
+                        "isLowerGrade" => "0",
+                        "isLowerGradeText" => "否",
+                        "onlineTime" => "",
+                        "offlineTime" => "",
+                        "status" => "1",
+                        "statusText" => "有效",
+                        "operator" => "",
+                        "operatorMemberId" => "0",
+                        "paramMethod" => "1",
+                        "paramMethodText" => "普通",
+                        "faultLevel" => "",
+                        "notice" => "",
+                        "alarmTime" => "",
+                        "alarmConfigure" => "",
+                        "alarmLevel" => "",
+                        "alarmLevelText" => "",
+                        "apiSource" => "2",
+                        "apiSourceText" => "",
+                        "isTask" => "0",
+                        "isTaskText" => "",
+                        "cron" => "",
+                        "gmtLastcalled" => "2022-06-13",
+                        "workerName" => $this->userName,
+                        "memberId" => $this->userId
+                    ];
+                }
+            }
+        }
+        if ($params) {
+            foreach ($params as $param) {
+                $this->post($this->renameUrl, $param);
+            }
+        }
         $this->info('结束同步Mss...');
     }
 
@@ -101,7 +230,6 @@ class Mss extends Command
     protected function scanner($path)
     {
         $this->info('开始扫描目录...');
-        sleep(1);
         $path = $path . '/' . $this->controllerPath;
         $length = strlen($path);
         $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path), \RecursiveIteratorIterator::SELF_FIRST);
@@ -116,6 +244,8 @@ class Mss extends Command
             $class = '\\App\\Controllers\\' . substr($info->getPathname(), $length + 1, -4);
             $controllerMap[] = $class;
         }
+        sleep(1);
+        $this->info('结束扫描目录...');
         return $this->parserController($controllerMap);
     }
 
@@ -126,7 +256,7 @@ class Mss extends Command
      */
     protected function parserController($controllerMap)
     {
-        $sdks = [];
+        $mss = [];
         foreach ($controllerMap as $class) {
             $class = str_replace("/", "\\", $class);
             if (!class_exists($class)) {
@@ -137,7 +267,9 @@ class Mss extends Command
 
             $annotation = new Annotation($reflect);
             $annotation->prefix();
+            $annotation->info();
             // Actions
+            $methods = [];
             foreach ($reflect->getMethods(\ReflectionMethod::IS_PUBLIC) as $_reflect) {
                 if ($_reflect->class !== $reflect->name) {
                     continue;
@@ -152,14 +284,22 @@ class Mss extends Command
                 $actionAnnotation = new Annotation($_reflect);
                 $actionAnnotation->info();
                 $actionAnnotation->requeset();
-                $sdks[] = [
+                $methods[] = [
                     'name' => trim($actionAnnotation->name),
-                    'path' => $annotation->prefix . $actionAnnotation->path,
+                    'uri' => $actionAnnotation->path,
+                    'logicClass' => $logicClass,
                     'sdks' => $this->parserLogic($logicClass)
                 ];
             }
+            $mss[] = [
+                'id' => '{id}',
+                'projectId' => '{projectId}',
+                'name' => trim($annotation->name),
+                'prefix' => $annotation->prefix,
+                'actions' => $methods
+            ];
         }
-        return $sdks;
+        return $mss;
     }
 
     /**
@@ -234,13 +374,12 @@ class Mss extends Command
                 // 例: return $this->restful("POST", "/orderStatistic/distribution", $body, $query, $extra);
                 if (preg_match('/return\s*\$this->restful\(\"(POST|GET)\",\s*\"([\/\w]+)\",/', $actionTxt, $matches)) {
                     $sdks[$sdkName . $matches[2]] = [
-//                        'sdkName' => $sdkName,
-//                        'sdkClass' => $sdkClass,
-                        'description' => trim($annotation->name),
-                        'path' => $matches[2],
-                        'method' => $matches[1],
-                        'thirdFlag' => 0,
-                        'domain' => $reflect->getDefaultProperties()['serviceName'] . '.uniondrug.cn'
+                        'sdkName' => $sdkName,
+                        'sdkClass' => $sdkClass,
+                        'sdkMethod' => $matches[1],
+                        'sdkDescription' => $annotation->name,
+                        'sdkPath' => $matches[2],
+                        'sdkDomain' => $reflect->getDefaultProperties()['serviceName'] . '.uniondrug.cn'
                     ];
                 }
             }
@@ -323,6 +462,32 @@ class Mss extends Command
         return implode('', $textArr);
     }
 
+    // 打印
+    private function dd($data)
+    {
+        echo "<pre/>";
+        print_r($data);
+        exit;
+    }
+
+    // http
+    private function post($url, $data)
+    {
+        $res = $this->httpClient->post($url, [
+            'json' => $data,
+            'headers' => [
+                'Content-type' => 'application/json',
+                'Authorization' => 'Bearer ' . $this->mssToken,
+            ]
+        ]);
+        $res = json_decode($res->getBody()->__toString(), 1);
+        if ($res['errno'] != 0) {
+            $this->error("请求mss接口Error:{$res['error']}");
+            exit;
+        }
+        return $res['data'];
+    }
+
     // 初始化
     protected function init()
     {
@@ -330,7 +495,6 @@ class Mss extends Command
             $this->error('ERROR: projectId 缺失');
             exit;
         }
-
         if (!$this->mssToken) {
             $this->error('ERROR: mssToken 缺失');
             exit;
@@ -342,7 +506,14 @@ class Mss extends Command
             exit;
         }
 
-        // 项目一致校验
+//        $gitUrl = exec('git ls-remote --get-url origin');
+//        $gitHttpUrl = str_replace(':36022', '', str_replace('ssh://git@', 'https://', $gitUrl));
+//        if ($detailData['projectCodeUrl'] != substr($gitHttpUrl, 0, -4)) {
+//            $this->info($detailData['projectCodeUrl']);
+//            $this->info(substr($gitHttpUrl, 0, -4));
+//            $this->error("ERROR: projectId与当前项目不一致");
+//            exit;
+//        }
         $appName = app()->getConfig()->path('app.appName');
         if ($detailData['projectCode'] != $appName) {
             $this->error("ERROR: projectId与当前项目不一致");
@@ -390,33 +561,6 @@ class Mss extends Command
                 exit;
             }
         }
-    }
-
-
-    // http
-    private function post($url, $data)
-    {
-        $res = $this->httpClient->post($url, [
-            'json' => $data,
-            'headers' => [
-                'Content-type' => 'application/json',
-                'Authorization' => 'Bearer ' . $this->mssToken,
-            ]
-        ]);
-        $res = json_decode($res->getBody()->__toString(), 1);
-        if ($res['errno'] != 0) {
-            $this->error("请求mss接口Error: {$res['error']}");
-            exit;
-        }
-        return $res['data'];
-    }
-
-    // 打印
-    private function dd($data)
-    {
-        echo "<pre/>";
-        print_r($data);
-        exit;
     }
 
 }

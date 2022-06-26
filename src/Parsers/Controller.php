@@ -197,4 +197,17 @@ class Controller extends Base
         !empty($method) && ($method::$sort = 1);
         return $data;
     }
+
+    /**
+     * 构建Mss中apis
+     * @return array
+     */
+    public function toMss()
+    {
+        $data = [];
+        foreach ($this->methods as $method) {
+            $data[] = $method->toMss(trim($this->annotation->name));
+        }
+        return $data;
+    }
 }
