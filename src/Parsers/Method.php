@@ -177,7 +177,7 @@ class Method extends Base
     public function toMss($controllerName)
     {
         return [
-            "apiName" => trim($this->annotation->name) . "【{$controllerName}】",
+            "apiName" => trim($this->annotation->name) . "【" . ltrim($controllerName, 'Class ') . "】",
             "method" => trim($this->annotation->method),
             "apiUrl" => trim($this->controller->annotation->prefix) . trim($this->annotation->path),
         ];
