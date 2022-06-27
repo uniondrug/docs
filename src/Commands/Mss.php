@@ -297,7 +297,7 @@ class Mss extends Command
             return '';
         }
         $actionText = $this->readFileByLine($reflect->getFileName(), $reflect->getStartLine(), $reflect->getEndLine());
-        if (!preg_match('/=\s*([\w]+)::factory/', $actionText, $matches)) {
+        if (!preg_match('/\s*([\w]+)::factory/', $actionText, $matches)) {
             return '';
         }
         $logicName = $matches[1];
